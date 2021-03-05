@@ -244,6 +244,16 @@ void Decoration::init()
         this, &Decoration::reconfigure);
     connect(m_internalSettings.data(), &InternalSettings::configChanged,
         this, &Decoration::reconfigure);
+
+    // Window Decoration KCM
+    // The reconfigure signal will update active windows, but we need to hook
+    // individual signals for the preview in the KCM.
+    connect(settings().data(), &KDecoration2::DecorationSettings::borderSizeChanged,
+        this, &Decoration::updateBorders);
+    connect(settings().data(), &KDecoration2::DecorationSettings::fontChanged,
+        this, &Decoration::updateBorders);
+    connect(settings().data(), &KDecoration2::DecorationSettings::spacingChanged,
+        this, &Decoration::updateBorders);
 }
 
 void Decoration::reconfigure()
