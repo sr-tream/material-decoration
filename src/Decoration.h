@@ -89,6 +89,14 @@ private:
     int appMenuCaptionSpacing() const;
     int captionMinWidth() const;
 
+    int bottomBorderSize() const;
+    int sideBorderSize() const;
+
+    bool leftBorderVisible() const;
+    bool rightBorderVisible() const;
+    bool topBorderVisible() const;
+    bool bottomBorderVisible() const;
+
     bool titleBarIsHovered() const;
     int getTextWidth(const QString text, bool showMnemonic = false) const;
     QPoint windowPos() const;

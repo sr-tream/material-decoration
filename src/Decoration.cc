@@ -168,6 +168,14 @@ void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
     paintTitleBarBackground(painter, repaintRegion);
     paintButtons(painter, repaintRegion);
     paintCaption(painter, repaintRegion);
+
+    // Simple 1px border outline
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(titleBarForegroundColor());
+    painter->drawRect( rect().adjusted( 0, 0, -1, -1 ) );
+    painter->restore();
 }
 
 void Decoration::init()
@@ -207,6 +215,15 @@ void Decoration::init()
             this, &Decoration::updateButtonsGeometry);
     connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedChanged,
             this, &Decoration::updateButtonsGeometry);
+
+    connect(decoratedClient, &KDecoration2::DecoratedClient::adjacentScreenEdgesChanged,
+            this, &Decoration::updateBorders);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedHorizontallyChanged,
+            this, &Decoration::updateBorders);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedVerticallyChanged,
+            this, &Decoration::updateBorders);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::shadedChanged,
+            this, &Decoration::updateBorders);
 
     connect(decoratedClient, &KDecoration2::DecoratedClient::captionChanged,
             this, repaintTitleBar);
@@ -339,8 +356,12 @@ void Decoration::onSectionUnderMouseChanged(const Qt::WindowFrameSection value)
 
 void Decoration::updateBorders()
 {
+    const int sideSize = sideBorderSize();
     QMargins borders;
     borders.setTop(titleBarHeight());
+    borders.setLeft(leftBorderVisible() ? sideSize : 0);
+    borders.setRight(rightBorderVisible() ? sideSize : 0);
+    borders.setBottom(bottomBorderVisible() ? bottomBorderSize() : 0);
     setBorders(borders);
 }
 
@@ -585,6 +606,60 @@ int Decoration::captionMinWidth() const
     return settings()->largeSpacing() * 8;
 }
 
+int Decoration::bottomBorderSize() const {
+    const int baseSize = settings()->smallSpacing();
+    switch (settings()->borderSize()) {
+        default:
+        case KDecoration2::BorderSize::None:
+            return 0;
+        case KDecoration2::BorderSize::NoSides:
+        case KDecoration2::BorderSize::Tiny:
+            return 1; // Breeze: max(4, baseSize)
+        case KDecoration2::BorderSize::Normal:
+            return baseSize; // Breeze: baseSize*2
+        case KDecoration2::BorderSize::Large:
+            return baseSize*2; // Breeze: baseSize*3
+        case KDecoration2::BorderSize::VeryLarge:
+            return baseSize*3; // Breeze: ...
+        case KDecoration2::BorderSize::Huge:
+            return baseSize*4;
+        case KDecoration2::BorderSize::VeryHuge:
+            return baseSize*5;
+        case KDecoration2::BorderSize::Oversized:
+            return baseSize*10; // Same as Breeze
+    }
+}
+int Decoration::sideBorderSize() const {
+    switch (settings()->borderSize()) {
+        case KDecoration2::BorderSize::NoSides:
+            return 0;
+        default:
+            return bottomBorderSize();
+    }
+}
+
+bool Decoration::Decoration::leftBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedHorizontally()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::LeftEdge);
+}
+bool Decoration::rightBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedHorizontally()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::RightEdge);
+}
+bool Decoration::topBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedVertically()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::TopEdge);
+}
+bool Decoration::bottomBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedVertically()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::BottomEdge)
+        && !decoratedClient->isShaded();
+}
+
 bool Decoration::titleBarIsHovered() const
 {
     return sectionUnderMouse() == Qt::TitleBarArea;
@@ -784,12 +859,10 @@ void Decoration::paintTitleBarBackground(QPainter *painter, const QRect &repaint
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().toStrongRef().data();
-
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setBrush(titleBarBackgroundColor());
-    painter->drawRect(QRect(0, 0, decoratedClient->width(), titleBarHeight()));
+    painter->drawRect(QRect(0, 0, size().width(), titleBarHeight()));
     painter->restore();
 }
 
