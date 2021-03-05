@@ -220,7 +220,7 @@ int AppMenuModel::rowCount(const QModelIndex &parent) const
 
 void AppMenuModel::update()
 {
-    qCDebug(category) << "AppMenuModel::update (" << m_winId << ")";
+    // qCDebug(category) << "AppMenuModel::update (" << m_winId << ")";
     beginResetModel();
     endResetModel();
     m_updatePending = false;
@@ -230,7 +230,7 @@ void AppMenuModel::update()
 void AppMenuModel::onActiveWindowChanged(WId id)
 {
     qApp->removeNativeEventFilter(this);
-    qCDebug(category) << "AppMenuModel::onActiveWindowChanged" << id << " ( == " << m_winId << ")";
+    // qCDebug(category) << "AppMenuModel::onActiveWindowChanged" << id << " ( == " << m_winId << ")";
 
     if (m_winId!=-1  && m_winId!=id) {
         //! ignore any other window except the one preferred from plasmoid

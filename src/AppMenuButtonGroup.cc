@@ -97,7 +97,7 @@ void AppMenuButtonGroup::setCurrentIndex(int set)
 {
     if (m_currentIndex != set) {
         m_currentIndex = set;
-        qCDebug(category) << "setCurrentIndex" << m_currentIndex;
+        // qCDebug(category) << "setCurrentIndex" << m_currentIndex;
         emit currentIndexChanged();
     }
 }
@@ -111,7 +111,7 @@ void AppMenuButtonGroup::setOverflowing(bool set)
 {
     if (m_overflowing != set) {
         m_overflowing = set;
-        qCDebug(category) << "setOverflowing" << m_overflowing;
+        // qCDebug(category) << "setOverflowing" << m_overflowing;
         emit overflowingChanged();
     }
 }
@@ -125,7 +125,7 @@ void AppMenuButtonGroup::setHovered(bool value)
 {
     if (m_hovered != value) {
         m_hovered = value;
-        qCDebug(category) << "setHovered" << m_hovered;
+        // qCDebug(category) << "setHovered" << m_hovered;
         emit hoveredChanged(value);
     }
 }
@@ -139,7 +139,7 @@ void AppMenuButtonGroup::setAlwaysShow(bool value)
 {
     if (m_alwaysShow != value) {
         m_alwaysShow = value;
-        qCDebug(category) << "setAlwaysShow" << m_alwaysShow;
+        // qCDebug(category) << "setAlwaysShow" << m_alwaysShow;
         emit alwaysShowChanged(value);
     }
 }
@@ -208,18 +208,18 @@ KDecoration2::DecorationButton* AppMenuButtonGroup::buttonAt(int x, int y) const
 
 void AppMenuButtonGroup::resetButtons()
 {
-    qCDebug(category) << "    resetButtons";
-    qCDebug(category) << "        before" << buttons();
+    // qCDebug(category) << "    resetButtons";
+    // qCDebug(category) << "        before" << buttons();
     auto list = QVector<QPointer<KDecoration2::DecorationButton>>(buttons());
-    qCDebug(category) << "          list" << list;
+    // qCDebug(category) << "          list" << list;
     removeButton(KDecoration2::DecorationButtonType::Custom);
-    qCDebug(category) << "     remCustom" << buttons();
+    // qCDebug(category) << "     remCustom" << buttons();
     while (!list.isEmpty()) {
         auto item = list.takeFirst();
-        qCDebug(category) << "        delete" << item;
+        // qCDebug(category) << "        delete" << item;
         delete item;
     }
-    qCDebug(category) << "         after" << list;
+    // qCDebug(category) << "         after" << list;
     emit menuUpdated();
 }
 
@@ -244,7 +244,7 @@ void AppMenuButtonGroup::updateAppMenuModel()
 
     if (m_appMenuModel) {
         // Update AppMenuModel
-        qCDebug(category) << "AppMenuModel" << m_appMenuModel;
+        // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
 
         resetButtons();
 
@@ -257,7 +257,7 @@ void AppMenuButtonGroup::updateAppMenuModel()
             const QVariant data = m_appMenuModel->data(index, AppMenuModel::ActionRole);
             QAction *itemAction = (QAction *)data.value<void *>();
 
-            qCDebug(category) << "    " << itemAction;
+            // qCDebug(category) << "    " << itemAction;
 
             TextButton *b = new TextButton(deco, row, this);
             b->setText(itemLabel);
@@ -279,16 +279,16 @@ void AppMenuButtonGroup::updateAppMenuModel()
 
     } else {
         // Init AppMenuModel
-        qCDebug(category) << "windowId" << decoratedClient->windowId();
+        // qCDebug(category) << "windowId" << decoratedClient->windowId();
         WId windowId = decoratedClient->windowId();
         if (windowId != 0) {
             m_appMenuModel = new AppMenuModel(this);
             connect(m_appMenuModel, &AppMenuModel::modelReset,
                 this, &AppMenuButtonGroup::updateAppMenuModel);
 
-            qCDebug(category) << "AppMenuModel" << m_appMenuModel;
+            // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
             m_appMenuModel->setWinId(windowId);
-            qCDebug(category) << "AppMenuModel" << m_appMenuModel;
+            // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
         }
     }
 }
@@ -317,7 +317,7 @@ void AppMenuButtonGroup::updateOverflow(QRectF availableRect)
 }
 
 void AppMenuButtonGroup::trigger(int buttonIndex) {
-    qCDebug(category) << "AppMenuButtonGroup::trigger" << buttonIndex;
+    // qCDebug(category) << "AppMenuButtonGroup::trigger" << buttonIndex;
     KDecoration2::DecorationButton* button = buttons().value(buttonIndex);
 
     // https://github.com/psifidotos/applet-window-appmenu/blob/908e60831d7d68ee56a56f9c24017a71822fc02d/lib/appmenuapplet.cpp#L167
@@ -349,11 +349,11 @@ void AppMenuButtonGroup::trigger(int buttonIndex) {
         const QModelIndex modelIndex = m_appMenuModel->index(buttonIndex, 0);
         const QVariant data = m_appMenuModel->data(modelIndex, AppMenuModel::ActionRole);
         QAction *itemAction = (QAction *)data.value<void *>();
-        qCDebug(category) << "    action" << itemAction;
+        // qCDebug(category) << "    action" << itemAction;
 
         if (itemAction) {
             actionMenu = itemAction->menu();
-            qCDebug(category) << "    menu" << actionMenu;
+            // qCDebug(category) << "    menu" << actionMenu;
         }
     }
 
@@ -425,7 +425,7 @@ void AppMenuButtonGroup::trigger(int buttonIndex) {
 
 void AppMenuButtonGroup::triggerOverflow()
 {
-    qCDebug(category) << "AppMenuButtonGroup::triggerOverflow" << m_overflowIndex;
+    // qCDebug(category) << "AppMenuButtonGroup::triggerOverflow" << m_overflowIndex;
     trigger(m_overflowIndex);
 }
 
@@ -491,7 +491,7 @@ bool AppMenuButtonGroup::eventFilter(QObject *watched, QEvent *event)
 
 void AppMenuButtonGroup::unPressAllButtons()
 {
-    qCDebug(category) << "AppMenuButtonGroup::unPressAllButtons";
+    // qCDebug(category) << "AppMenuButtonGroup::unPressAllButtons";
     for (int i = 0; i < buttons().length(); i++) {
         KDecoration2::DecorationButton* button = buttons().value(i);
 

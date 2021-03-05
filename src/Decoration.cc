@@ -332,7 +332,8 @@ void Decoration::wheelEvent(QWheelEvent *event)
 
 void Decoration::onSectionUnderMouseChanged(const Qt::WindowFrameSection value)
 {
-    qCDebug(category) << "onSectionUnderMouseChanged" << value;
+    Q_UNUSED(value);
+    // qCDebug(category) << "onSectionUnderMouseChanged" << value;
     updateTitleBarHoverState();
 }
 
@@ -649,7 +650,7 @@ bool Decoration::dragMoveTick(const QPoint pos)
     }
 
     QPoint diff = pos - m_pressedPoint;
-    qCDebug(category) << "    diff" << diff << "mL" << diff.manhattanLength() << "sDD" << QApplication::startDragDistance();
+    // qCDebug(category) << "    diff" << diff << "mL" << diff.manhattanLength() << "sDD" << QApplication::startDragDistance();
     if (diff.manhattanLength() >= QApplication::startDragDistance()) {
         sendMoveEvent(pos);
         resetDragMove();
