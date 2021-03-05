@@ -30,6 +30,7 @@
 // Qt
 #include <QHoverEvent>
 #include <QMouseEvent>
+#include <QRectF>
 #include <QSharedPointer>
 #include <QWheelEvent>
 #include <QVariant>
@@ -52,6 +53,8 @@ class Decoration : public KDecoration2::Decoration
 public:
     Decoration(QObject *parent = nullptr, const QVariantList &args = QVariantList());
     ~Decoration() override;
+
+    QRect centerRect() const;
 
     void paint(QPainter *painter, const QRect &repaintRegion) override;
 

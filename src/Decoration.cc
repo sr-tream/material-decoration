@@ -157,6 +157,25 @@ Decoration::~Decoration()
     }
 }
 
+QRect Decoration::centerRect() const
+{
+    const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
+    const int leftOffset = m_leftButtons->geometry().right()
+        + (leftButtonsVisible ? settings()->smallSpacing() : 0);
+
+    const bool rightButtonsVisible = !m_rightButtons->buttons().isEmpty();
+    const int rightOffset = m_rightButtons->geometry().width()
+        + (rightButtonsVisible ? settings()->smallSpacing() : 0);
+
+    const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
+    return titleBarRect.adjusted(
+        leftOffset,
+        0,
+        -rightOffset,
+        0
+    );
+}
+
 void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
 {
     auto *decoratedClient = client().toStrongRef().data();
@@ -424,36 +443,34 @@ void Decoration::updateButtonHeight()
 
 void Decoration::updateButtonsGeometry()
 {
+    const int sideSize = sideBorderSize();
+    const int leftOffset = leftBorderVisible() ? sideSize : 0;
+    const int rightOffset = rightBorderVisible() ? sideSize : 0;
+
     updateButtonHeight();
 
-    if (!m_leftButtons->buttons().isEmpty()) {
-        m_leftButtons->setPos(QPointF(0, 0));
-        m_leftButtons->setSpacing(0);
-    }
+    // Left
+    m_leftButtons->setPos(QPointF(leftOffset, 0));
+    m_leftButtons->setSpacing(0);
 
-    if (!m_rightButtons->buttons().isEmpty()) {
-        m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width(), 0));
-        m_rightButtons->setSpacing(0);
-    }
+    // Right
+    m_rightButtons->setPos(QPointF(
+        size().width() - rightOffset - m_rightButtons->geometry().width(),
+        0
+    ));
+    m_rightButtons->setSpacing(0);
 
+    // Menu
     if (!m_menuButtons->buttons().isEmpty()) {
-        const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
-        const int leftButtonsWidth = m_leftButtons->geometry().width()
-            + (leftButtonsVisible ? settings()->smallSpacing() : 0);
-
-        m_menuButtons->setPos(QPointF(leftButtonsWidth, 0));
-        m_menuButtons->setSpacing(0);
-
-        const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
-        const QRect availableRect = titleBarRect.adjusted(
-            leftButtonsWidth,
+        const int captionOffset = captionMinWidth() + settings()->smallSpacing();
+        const QRect availableRect = centerRect().adjusted(
             0,
-            -m_rightButtons->geometry().width()
-                - settings()->smallSpacing()
-                - captionMinWidth()
-                - settings()->smallSpacing(),
+            0,
+            -captionOffset,
             0
         );
+        m_menuButtons->setPos(availableRect.topLeft());
+        m_menuButtons->setSpacing(0);
         m_menuButtons->updateOverflow(availableRect);
     }
 
