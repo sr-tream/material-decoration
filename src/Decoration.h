@@ -114,6 +114,7 @@ private:
     void paintTitleBarBackground(QPainter *painter, const QRect &repaintRegion) const;
     void paintCaption(QPainter *painter, const QRect &repaintRegion) const;
     void paintButtons(QPainter *painter, const QRect &repaintRegion) const;
+    void paintOutline(QPainter *painter, const QRect &repaintRegion) const;
 
     KDecoration2::DecorationButtonGroup *m_leftButtons;
     KDecoration2::DecorationButtonGroup *m_rightButtons;

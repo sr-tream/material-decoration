@@ -168,16 +168,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
     paintTitleBarBackground(painter, repaintRegion);
     paintButtons(painter, repaintRegion);
     paintCaption(painter, repaintRegion);
-
-    // Simple 1px border outline
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing, false);
-    painter->setBrush(Qt::NoBrush);
-    QColor outlineColor(titleBarForegroundColor());
-    outlineColor.setAlphaF(0.25);
-    painter->setPen(outlineColor);
-    painter->drawRect( rect().adjusted( 0, 0, -1, -1 ) );
-    painter->restore();
+    paintOutline(painter, repaintRegion);
 }
 
 void Decoration::init()
@@ -986,6 +977,21 @@ void Decoration::paintButtons(QPainter *painter, const QRect &repaintRegion) con
     m_leftButtons->paint(painter, repaintRegion);
     m_rightButtons->paint(painter, repaintRegion);
     m_menuButtons->paint(painter, repaintRegion);
+}
+
+void Decoration::paintOutline(QPainter *painter, const QRect &repaintRegion) const
+{
+    Q_UNUSED(repaintRegion)
+
+    // Simple 1px border outline
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setBrush(Qt::NoBrush);
+    QColor outlineColor(titleBarForegroundColor());
+    outlineColor.setAlphaF(0.25);
+    painter->setPen(outlineColor);
+    painter->drawRect( rect().adjusted( 0, 0, -1, -1 ) );
+    painter->restore();
 }
 
 } // namespace Material
