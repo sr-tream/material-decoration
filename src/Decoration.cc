@@ -173,7 +173,9 @@ void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(titleBarForegroundColor());
+    QColor outlineColor(titleBarForegroundColor());
+    outlineColor.setAlphaF(0.25);
+    painter->setPen(outlineColor);
     painter->drawRect( rect().adjusted( 0, 0, -1, -1 ) );
     painter->restore();
 }
@@ -814,22 +816,30 @@ void Decoration::paintFrameBackground(QPainter *painter, const QRect &repaintReg
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().toStrongRef().data();
-
     painter->save();
 
     painter->fillRect(rect(), Qt::transparent);
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(decoratedClient->color(
-        decoratedClient->isActive()
-            ? KDecoration2::ColorGroup::Active
-            : KDecoration2::ColorGroup::Inactive,
-        KDecoration2::ColorRole::Frame));
+    painter->setBrush(borderColor());
     painter->setClipRect(0, borderTop(), size().width(), size().height() - borderTop(), Qt::IntersectClip);
     painter->drawRect(rect());
 
     painter->restore();
+}
+
+QColor Decoration::borderColor() const
+{
+    const auto *decoratedClient = client().toStrongRef().data();
+    const auto group = decoratedClient->isActive()
+        ? KDecoration2::ColorGroup::Active
+        : KDecoration2::ColorGroup::Inactive;
+    const qreal opacity = decoratedClient->isActive()
+        ? m_internalSettings->activeOpacity()
+        : m_internalSettings->inactiveOpacity();
+    QColor color = decoratedClient->color(group, KDecoration2::ColorRole::Frame);
+    color.setAlphaF(opacity);
+    return color;
 }
 
 QColor Decoration::titleBarBackgroundColor() const

@@ -106,6 +106,7 @@ private:
     bool dragMoveTick(const QPoint pos);
     void sendMoveEvent(const QPoint pos);
 
+    QColor borderColor() const;
     QColor titleBarBackgroundColor() const;
     QColor titleBarForegroundColor() const;
 
