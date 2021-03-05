@@ -42,6 +42,7 @@
 
 // Qt
 #include <QDebug>
+#include <QMargins>
 #include <QPainter>
 #include <QVariantAnimation>
 #include <QtMath> // qFloor
@@ -56,6 +57,7 @@ Button::Button(KDecoration2::DecorationButtonType type, Decoration *decoration, 
     , m_animation(new QVariantAnimation(this))
     , m_opacity(1)
     , m_transitionValue(0)
+    , m_padding(new QMargins())
     , m_isGtkButton(false)
 {
     connect(this, &Button::hoveredChanged, this,
@@ -278,10 +280,20 @@ void Button::paintIcon(QPainter *painter, const QRectF &iconRect, const qreal gr
     Q_UNUSED(gridUnit)
 }
 
+void Button::updateSize(int contentWidth, int contentHeight)
+{
+    const QSize size(
+        m_padding->left() + contentWidth + m_padding->right(),
+        contentHeight
+    );
+    setGeometry(QRect(QPoint(0, 0), size));
+}
+
 void Button::setHeight(int buttonHeight)
 {
-    const QSize size(qRound(buttonHeight * 1.33), buttonHeight);
-    setGeometry(QRect(QPoint(0, 0), size));
+    // For simplicity, don't count the 1.33:1 scaling in the left/right padding.
+    // The left/right padding is mainly for the border offset alignment.
+    updateSize(qRound(buttonHeight * 1.33), buttonHeight);
 }
 
 qreal Button::iconLineWidth(const qreal gridUnit) const
@@ -460,6 +472,11 @@ void Button::setTransitionValue(qreal value)
         m_transitionValue = value;
         emit transitionValueChanged(value);
     }
+}
+
+QMargins* Button::padding()
+{
+    return m_padding;
 }
 
 void Button::updateAnimationState(bool hovered)
