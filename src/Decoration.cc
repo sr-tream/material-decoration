@@ -176,25 +176,9 @@ void Decoration::init()
 
     auto *decoratedClient = client().toStrongRef().data();
 
-    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
-            this, &Decoration::updateTitleBar);
-    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
-            this, &Decoration::updateButtonsGeometry);
-    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedChanged,
-            this, &Decoration::updateButtonsGeometry);
-
     auto repaintTitleBar = [this] {
         update(titleBar());
     };
-
-    connect(decoratedClient, &KDecoration2::DecoratedClient::captionChanged,
-            this, repaintTitleBar);
-    connect(decoratedClient, &KDecoration2::DecoratedClient::activeChanged,
-            this, repaintTitleBar);
-
-    updateBorders();
-    updateResizeBorders();
-    updateTitleBar();
 
     m_leftButtons = new KDecoration2::DecorationButtonGroup(
         KDecoration2::DecorationButtonGroup::Position::Left,
@@ -216,6 +200,22 @@ void Decoration::init()
             this, repaintTitleBar);
     m_menuButtons->updateAppMenuModel();
 
+
+    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
+            this, &Decoration::updateTitleBar);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
+            this, &Decoration::updateButtonsGeometry);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedChanged,
+            this, &Decoration::updateButtonsGeometry);
+
+    connect(decoratedClient, &KDecoration2::DecoratedClient::captionChanged,
+            this, repaintTitleBar);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::activeChanged,
+            this, repaintTitleBar);
+
+    updateBorders();
+    updateResizeBorders();
+    updateTitleBar();
     updateButtonsGeometry();
 
     connect(this, &KDecoration2::Decoration::sectionUnderMouseChanged,
