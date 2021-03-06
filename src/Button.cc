@@ -24,6 +24,8 @@
 #include "AppIconButton.h"
 #include "ApplicationMenuButton.h"
 #include "OnAllDesktopsButton.h"
+#include "ContextHelpButton.h"
+#include "ShadeButton.h"
 #include "KeepAboveButton.h"
 #include "KeepBelowButton.h"
 #include "CloseButton.h"
@@ -103,6 +105,14 @@ Button::Button(KDecoration2::DecorationButtonType type, Decoration *decoration, 
         OnAllDesktopsButton::init(this, decoratedClient);
         break;
 
+    case KDecoration2::DecorationButtonType::ContextHelp:
+        ContextHelpButton::init(this, decoratedClient);
+        break;
+
+    case KDecoration2::DecorationButtonType::Shade:
+        ShadeButton::init(this, decoratedClient);
+        break;
+
     case KDecoration2::DecorationButtonType::KeepAbove:
         KeepAboveButton::init(this, decoratedClient);
         break;
@@ -143,6 +153,8 @@ KDecoration2::DecorationButton* Button::create(KDecoration2::DecorationButtonTyp
     case KDecoration2::DecorationButtonType::Menu:
     // case KDecoration2::DecorationButtonType::ApplicationMenu:
     case KDecoration2::DecorationButtonType::OnAllDesktops:
+    case KDecoration2::DecorationButtonType::ContextHelp:
+    case KDecoration2::DecorationButtonType::Shade:
     case KDecoration2::DecorationButtonType::KeepAbove:
     case KDecoration2::DecorationButtonType::KeepBelow:
     case KDecoration2::DecorationButtonType::Close:
@@ -221,6 +233,14 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
 
     case KDecoration2::DecorationButtonType::OnAllDesktops:
         OnAllDesktopsButton::paintIcon(this, painter, iconRect, gridUnit);
+        break;
+
+    case KDecoration2::DecorationButtonType::ContextHelp:
+        ContextHelpButton::paintIcon(this, painter, iconRect, gridUnit);
+        break;
+
+    case KDecoration2::DecorationButtonType::Shade:
+        ShadeButton::paintIcon(this, painter, iconRect, gridUnit);
         break;
 
     case KDecoration2::DecorationButtonType::KeepAbove:
