@@ -300,7 +300,7 @@ void Button::setHeight(int buttonHeight)
 
 qreal Button::iconLineWidth(const qreal gridUnit) const
 {
-    return PenWidth::Symbol * qFloor(gridUnit);
+    return PenWidth::Symbol * qMax(1.0, gridUnit);
 }
 
 void Button::setPenWidth(QPainter *painter, const qreal gridUnit, const qreal scale)
