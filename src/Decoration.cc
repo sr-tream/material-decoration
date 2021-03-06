@@ -157,6 +157,11 @@ Decoration::~Decoration()
     }
 }
 
+QRect Decoration::titleBarRect() const
+{
+    return QRect(0, 0, size().width(), titleBarHeight());
+}
+
 QRect Decoration::centerRect() const
 {
     const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
@@ -167,8 +172,7 @@ QRect Decoration::centerRect() const
     const int rightOffset = m_rightButtons->geometry().width()
         + (rightButtonsVisible ? settings()->smallSpacing() : 0);
 
-    const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
-    return titleBarRect.adjusted(
+    return titleBarRect().adjusted(
         leftOffset,
         0,
         -rightOffset,
@@ -692,9 +696,9 @@ bool Decoration::titleBarIsHovered() const
 int Decoration::getTextWidth(const QString text, bool showMnemonic) const
 {
     const QFontMetrics fontMetrics(settings()->font());
-    const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
+    const QRect textRect(titleBarRect());
     int flags = showMnemonic ? Qt::TextShowMnemonic : Qt::TextHideMnemonic;
-    const QRect boundingRect = fontMetrics.boundingRect(titleBarRect, flags, text);
+    const QRect boundingRect = fontMetrics.boundingRect(textRect, flags, text);
     return boundingRect.width();
 }
 
@@ -907,22 +911,14 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
     const int textWidth = settings()->fontMetrics().boundingRect(decoratedClient->caption()).width();
     const QRect textRect((size().width() - textWidth) / 2, 0, textWidth, titleBarHeight());
 
-    const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
-
-    const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
-    const int leftButtonsWidth = m_leftButtons->geometry().width()
-        + (leftButtonsVisible ? settings()->smallSpacing() : 0);
-
     const bool appMenuVisible = !m_menuButtons->buttons().isEmpty();
     const int menuButtonsWidth = m_menuButtons->geometry().width()
         + (appMenuVisible ? appMenuCaptionSpacing() : 0);
 
-    const QRect availableRect = titleBarRect.adjusted(
-            + leftButtonsWidth
-            + (m_menuButtons->alwaysShow() ? menuButtonsWidth : 0),
+    const QRect availableRect = centerRect().adjusted(
+        (m_menuButtons->alwaysShow() ? menuButtonsWidth : 0),
         0,
-        -m_rightButtons->geometry().width()
-            - settings()->smallSpacing(),
+        0,
         0
     );
 
@@ -954,7 +950,7 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
                 captionRect = availableRect;
                 alignment = Qt::AlignRight | Qt::AlignVCenter;
             } else {
-                captionRect = titleBarRect;
+                captionRect = titleBarRect();
                 alignment = Qt::AlignCenter;
             }
             break;

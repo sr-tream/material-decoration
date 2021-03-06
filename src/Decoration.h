@@ -54,6 +54,7 @@ public:
     Decoration(QObject *parent = nullptr, const QVariantList &args = QVariantList());
     ~Decoration() override;
 
+    QRect titleBarRect() const;
     QRect centerRect() const;
 
     void paint(QPainter *painter, const QRect &repaintRegion) override;
