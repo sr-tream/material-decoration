@@ -157,6 +157,29 @@ Decoration::~Decoration()
     }
 }
 
+QRect Decoration::titleBarRect() const
+{
+    return QRect(0, 0, size().width(), titleBarHeight());
+}
+
+QRect Decoration::centerRect() const
+{
+    const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
+    const int leftOffset = m_leftButtons->geometry().right()
+        + (leftButtonsVisible ? settings()->smallSpacing() : 0);
+
+    const bool rightButtonsVisible = !m_rightButtons->buttons().isEmpty();
+    const int rightOffset = m_rightButtons->geometry().width()
+        + (rightButtonsVisible ? settings()->smallSpacing() : 0);
+
+    return titleBarRect().adjusted(
+        leftOffset,
+        0,
+        -rightOffset,
+        0
+    );
+}
+
 void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
 {
     auto *decoratedClient = client().toStrongRef().data();
@@ -168,6 +191,11 @@ void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
     paintTitleBarBackground(painter, repaintRegion);
     paintButtons(painter, repaintRegion);
     paintCaption(painter, repaintRegion);
+
+    // Don't paint outline for NoBorder, NoSideBorder, or Tiny borders.
+    if (settings()->borderSize() >= KDecoration2::BorderSize::Normal) {
+        paintOutline(painter, repaintRegion);
+    }
 }
 
 void Decoration::init()
@@ -176,25 +204,9 @@ void Decoration::init()
 
     auto *decoratedClient = client().toStrongRef().data();
 
-    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
-            this, &Decoration::updateTitleBar);
-    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
-            this, &Decoration::updateButtonsGeometry);
-    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedChanged,
-            this, &Decoration::updateButtonsGeometry);
-
     auto repaintTitleBar = [this] {
         update(titleBar());
     };
-
-    connect(decoratedClient, &KDecoration2::DecoratedClient::captionChanged,
-            this, repaintTitleBar);
-    connect(decoratedClient, &KDecoration2::DecoratedClient::activeChanged,
-            this, repaintTitleBar);
-
-    updateBorders();
-    updateResizeBorders();
-    updateTitleBar();
 
     m_leftButtons = new KDecoration2::DecorationButtonGroup(
         KDecoration2::DecorationButtonGroup::Position::Left,
@@ -216,6 +228,31 @@ void Decoration::init()
             this, repaintTitleBar);
     m_menuButtons->updateAppMenuModel();
 
+
+    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
+            this, &Decoration::updateTitleBar);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
+            this, &Decoration::updateButtonsGeometry);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedChanged,
+            this, &Decoration::updateButtonsGeometry);
+
+    connect(decoratedClient, &KDecoration2::DecoratedClient::adjacentScreenEdgesChanged,
+            this, &Decoration::updateBorders);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedHorizontallyChanged,
+            this, &Decoration::updateBorders);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::maximizedVerticallyChanged,
+            this, &Decoration::updateBorders);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::shadedChanged,
+            this, &Decoration::updateBorders);
+
+    connect(decoratedClient, &KDecoration2::DecoratedClient::captionChanged,
+            this, repaintTitleBar);
+    connect(decoratedClient, &KDecoration2::DecoratedClient::activeChanged,
+            this, repaintTitleBar);
+
+    updateBorders();
+    updateResizeBorders();
+    updateTitleBar();
     updateButtonsGeometry();
 
     connect(this, &KDecoration2::Decoration::sectionUnderMouseChanged,
@@ -230,6 +267,16 @@ void Decoration::init()
         this, &Decoration::reconfigure);
     connect(m_internalSettings.data(), &InternalSettings::configChanged,
         this, &Decoration::reconfigure);
+
+    // Window Decoration KCM
+    // The reconfigure signal will update active windows, but we need to hook
+    // individual signals for the preview in the KCM.
+    connect(settings().data(), &KDecoration2::DecorationSettings::borderSizeChanged,
+        this, &Decoration::updateBorders);
+    connect(settings().data(), &KDecoration2::DecorationSettings::fontChanged,
+        this, &Decoration::updateBorders);
+    connect(settings().data(), &KDecoration2::DecorationSettings::spacingChanged,
+        this, &Decoration::updateBorders);
 }
 
 void Decoration::reconfigure()
@@ -339,8 +386,12 @@ void Decoration::onSectionUnderMouseChanged(const Qt::WindowFrameSection value)
 
 void Decoration::updateBorders()
 {
+    const int sideSize = sideBorderSize();
     QMargins borders;
     borders.setTop(titleBarHeight());
+    borders.setLeft(leftBorderVisible() ? sideSize : 0);
+    borders.setRight(rightBorderVisible() ? sideSize : 0);
+    borders.setBottom(bottomBorderVisible() ? bottomBorderSize() : 0);
     setBorders(borders);
 }
 
@@ -396,36 +447,42 @@ void Decoration::updateButtonHeight()
 
 void Decoration::updateButtonsGeometry()
 {
+    const int sideSize = sideBorderSize();
+    const int leftOffset = leftBorderVisible() ? sideSize : 0;
+    const int rightOffset = rightBorderVisible() ? sideSize : 0;
+
     updateButtonHeight();
 
-    if (!m_leftButtons->buttons().isEmpty()) {
-        m_leftButtons->setPos(QPointF(0, 0));
-        m_leftButtons->setSpacing(0);
-    }
+    // Left
+    m_leftButtons->setPos(QPointF(leftOffset, 0));
+    m_leftButtons->setSpacing(0);
+    // if (!m_leftButtons->buttons().isEmpty()) {
+    //     auto *firstButon = qobject_cast<Button *>(m_leftButtons->buttons().front());
+    //     firstButon->padding()->setLeft(leftOffset);
+    // }
 
-    if (!m_rightButtons->buttons().isEmpty()) {
-        m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width(), 0));
-        m_rightButtons->setSpacing(0);
-    }
+    // Right
+    m_rightButtons->setPos(QPointF(
+        size().width() - rightOffset - m_rightButtons->geometry().width(),
+        0
+    ));
+    m_rightButtons->setSpacing(0);
+    // if (!m_rightButtons->buttons().isEmpty()) {
+    //     auto *lastButton = qobject_cast<Button *>(m_rightButtons->buttons().last());
+    //     lastButton->padding()->setRight(rightOffset);
+    // }
 
+    // Menu
     if (!m_menuButtons->buttons().isEmpty()) {
-        const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
-        const int leftButtonsWidth = m_leftButtons->geometry().width()
-            + (leftButtonsVisible ? settings()->smallSpacing() : 0);
-
-        m_menuButtons->setPos(QPointF(leftButtonsWidth, 0));
-        m_menuButtons->setSpacing(0);
-
-        const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
-        const QRect availableRect = titleBarRect.adjusted(
-            leftButtonsWidth,
+        const int captionOffset = captionMinWidth() + settings()->smallSpacing();
+        const QRect availableRect = centerRect().adjusted(
             0,
-            -m_rightButtons->geometry().width()
-                - settings()->smallSpacing()
-                - captionMinWidth()
-                - settings()->smallSpacing(),
+            0,
+            -captionOffset,
             0
         );
+        m_menuButtons->setPos(availableRect.topLeft());
+        m_menuButtons->setSpacing(0);
         m_menuButtons->updateOverflow(availableRect);
     }
 
@@ -585,6 +642,60 @@ int Decoration::captionMinWidth() const
     return settings()->largeSpacing() * 8;
 }
 
+int Decoration::bottomBorderSize() const {
+    const int baseSize = settings()->smallSpacing();
+    switch (settings()->borderSize()) {
+        default:
+        case KDecoration2::BorderSize::None:
+            return 0;
+        case KDecoration2::BorderSize::NoSides:
+        case KDecoration2::BorderSize::Tiny:
+            return 1; // Breeze: max(4, baseSize)
+        case KDecoration2::BorderSize::Normal:
+            return baseSize; // Breeze: baseSize*2
+        case KDecoration2::BorderSize::Large:
+            return baseSize*2; // Breeze: baseSize*3
+        case KDecoration2::BorderSize::VeryLarge:
+            return baseSize*3; // Breeze: ...
+        case KDecoration2::BorderSize::Huge:
+            return baseSize*4;
+        case KDecoration2::BorderSize::VeryHuge:
+            return baseSize*5;
+        case KDecoration2::BorderSize::Oversized:
+            return baseSize*10; // Same as Breeze
+    }
+}
+int Decoration::sideBorderSize() const {
+    switch (settings()->borderSize()) {
+        case KDecoration2::BorderSize::NoSides:
+            return 0;
+        default:
+            return bottomBorderSize();
+    }
+}
+
+bool Decoration::Decoration::leftBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedHorizontally()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::LeftEdge);
+}
+bool Decoration::rightBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedHorizontally()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::RightEdge);
+}
+bool Decoration::topBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedVertically()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::TopEdge);
+}
+bool Decoration::bottomBorderVisible() const {
+    const auto *decoratedClient = client().toStrongRef().data();
+    return !decoratedClient->isMaximizedVertically()
+        && !decoratedClient->adjacentScreenEdges().testFlag(Qt::BottomEdge)
+        && !decoratedClient->isShaded();
+}
+
 bool Decoration::titleBarIsHovered() const
 {
     return sectionUnderMouse() == Qt::TitleBarArea;
@@ -593,9 +704,9 @@ bool Decoration::titleBarIsHovered() const
 int Decoration::getTextWidth(const QString text, bool showMnemonic) const
 {
     const QFontMetrics fontMetrics(settings()->font());
-    const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
+    const QRect textRect(titleBarRect());
     int flags = showMnemonic ? Qt::TextShowMnemonic : Qt::TextHideMnemonic;
-    const QRect boundingRect = fontMetrics.boundingRect(titleBarRect, flags, text);
+    const QRect boundingRect = fontMetrics.boundingRect(textRect, flags, text);
     return boundingRect.width();
 }
 
@@ -739,22 +850,30 @@ void Decoration::paintFrameBackground(QPainter *painter, const QRect &repaintReg
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().toStrongRef().data();
-
     painter->save();
 
     painter->fillRect(rect(), Qt::transparent);
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(decoratedClient->color(
-        decoratedClient->isActive()
-            ? KDecoration2::ColorGroup::Active
-            : KDecoration2::ColorGroup::Inactive,
-        KDecoration2::ColorRole::Frame));
+    painter->setBrush(borderColor());
     painter->setClipRect(0, borderTop(), size().width(), size().height() - borderTop(), Qt::IntersectClip);
     painter->drawRect(rect());
 
     painter->restore();
+}
+
+QColor Decoration::borderColor() const
+{
+    const auto *decoratedClient = client().toStrongRef().data();
+    const auto group = decoratedClient->isActive()
+        ? KDecoration2::ColorGroup::Active
+        : KDecoration2::ColorGroup::Inactive;
+    const qreal opacity = decoratedClient->isActive()
+        ? m_internalSettings->activeOpacity()
+        : m_internalSettings->inactiveOpacity();
+    QColor color = decoratedClient->color(group, KDecoration2::ColorRole::Frame);
+    color.setAlphaF(opacity);
+    return color;
 }
 
 QColor Decoration::titleBarBackgroundColor() const
@@ -784,12 +903,10 @@ void Decoration::paintTitleBarBackground(QPainter *painter, const QRect &repaint
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().toStrongRef().data();
-
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setBrush(titleBarBackgroundColor());
-    painter->drawRect(QRect(0, 0, decoratedClient->width(), titleBarHeight()));
+    painter->drawRect(QRect(0, 0, size().width(), titleBarHeight()));
     painter->restore();
 }
 
@@ -802,22 +919,14 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
     const int textWidth = settings()->fontMetrics().boundingRect(decoratedClient->caption()).width();
     const QRect textRect((size().width() - textWidth) / 2, 0, textWidth, titleBarHeight());
 
-    const QRect titleBarRect(0, 0, size().width(), titleBarHeight());
-
-    const bool leftButtonsVisible = !m_leftButtons->buttons().isEmpty();
-    const int leftButtonsWidth = m_leftButtons->geometry().width()
-        + (leftButtonsVisible ? settings()->smallSpacing() : 0);
-
     const bool appMenuVisible = !m_menuButtons->buttons().isEmpty();
     const int menuButtonsWidth = m_menuButtons->geometry().width()
         + (appMenuVisible ? appMenuCaptionSpacing() : 0);
 
-    const QRect availableRect = titleBarRect.adjusted(
-            + leftButtonsWidth
-            + (m_menuButtons->alwaysShow() ? menuButtonsWidth : 0),
+    const QRect availableRect = centerRect().adjusted(
+        (m_menuButtons->alwaysShow() ? menuButtonsWidth : 0),
         0,
-        -m_rightButtons->geometry().width()
-            - settings()->smallSpacing(),
+        0,
         0
     );
 
@@ -849,7 +958,7 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
                 captionRect = availableRect;
                 alignment = Qt::AlignRight | Qt::AlignVCenter;
             } else {
-                captionRect = titleBarRect;
+                captionRect = titleBarRect();
                 alignment = Qt::AlignCenter;
             }
             break;
@@ -903,6 +1012,21 @@ void Decoration::paintButtons(QPainter *painter, const QRect &repaintRegion) con
     m_leftButtons->paint(painter, repaintRegion);
     m_rightButtons->paint(painter, repaintRegion);
     m_menuButtons->paint(painter, repaintRegion);
+}
+
+void Decoration::paintOutline(QPainter *painter, const QRect &repaintRegion) const
+{
+    Q_UNUSED(repaintRegion)
+
+    // Simple 1px border outline
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setBrush(Qt::NoBrush);
+    QColor outlineColor(titleBarForegroundColor());
+    outlineColor.setAlphaF(0.25);
+    painter->setPen(outlineColor);
+    painter->drawRect( rect().adjusted( 0, 0, -1, -1 ) );
+    painter->restore();
 }
 
 } // namespace Material

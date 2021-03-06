@@ -30,6 +30,7 @@
 // Qt
 #include <QHoverEvent>
 #include <QMouseEvent>
+#include <QRectF>
 #include <QSharedPointer>
 #include <QWheelEvent>
 #include <QVariant>
@@ -52,6 +53,9 @@ class Decoration : public KDecoration2::Decoration
 public:
     Decoration(QObject *parent = nullptr, const QVariantList &args = QVariantList());
     ~Decoration() override;
+
+    QRect titleBarRect() const;
+    QRect centerRect() const;
 
     void paint(QPainter *painter, const QRect &repaintRegion) override;
 
@@ -89,6 +93,14 @@ private:
     int appMenuCaptionSpacing() const;
     int captionMinWidth() const;
 
+    int bottomBorderSize() const;
+    int sideBorderSize() const;
+
+    bool leftBorderVisible() const;
+    bool rightBorderVisible() const;
+    bool topBorderVisible() const;
+    bool bottomBorderVisible() const;
+
     bool titleBarIsHovered() const;
     int getTextWidth(const QString text, bool showMnemonic = false) const;
     QPoint windowPos() const;
@@ -98,6 +110,7 @@ private:
     bool dragMoveTick(const QPoint pos);
     void sendMoveEvent(const QPoint pos);
 
+    QColor borderColor() const;
     QColor titleBarBackgroundColor() const;
     QColor titleBarForegroundColor() const;
 
@@ -105,6 +118,7 @@ private:
     void paintTitleBarBackground(QPainter *painter, const QRect &repaintRegion) const;
     void paintCaption(QPainter *painter, const QRect &repaintRegion) const;
     void paintButtons(QPainter *painter, const QRect &repaintRegion) const;
+    void paintOutline(QPainter *painter, const QRect &repaintRegion) const;
 
     KDecoration2::DecorationButtonGroup *m_leftButtons;
     KDecoration2::DecorationButtonGroup *m_rightButtons;

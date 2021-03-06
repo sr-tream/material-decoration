@@ -42,6 +42,7 @@
 
 // Qt
 #include <QDebug>
+#include <QMargins>
 #include <QPainter>
 #include <QVariantAnimation>
 #include <QtMath> // qFloor
@@ -56,6 +57,7 @@ Button::Button(KDecoration2::DecorationButtonType type, Decoration *decoration, 
     , m_animation(new QVariantAnimation(this))
     , m_opacity(1)
     , m_transitionValue(0)
+    , m_padding(new QMargins())
     , m_isGtkButton(false)
 {
     connect(this, &Button::hoveredChanged, this,
@@ -178,7 +180,9 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
 
     // Buttons are coded assuming 24 units in size.
     const QRectF buttonRect = geometry();
-    const qreal iconScale = buttonRect.height()/24;
+    const QRectF contentRect = contentArea();
+
+    const qreal iconScale = contentRect.height()/24;
     int iconSize;
     if (m_isGtkButton) {
         // See: https://github.com/Zren/material-decoration/issues/22
@@ -200,7 +204,7 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
         iconSize = qRound(iconScale * 10);
     }
     QRectF iconRect = QRectF(0, 0, iconSize, iconSize);
-    iconRect.moveCenter(buttonRect.center().toPoint());
+    iconRect.moveCenter(contentRect.center().toPoint());
 
     const qreal gridUnit = iconRect.height()/10;
 
@@ -278,10 +282,20 @@ void Button::paintIcon(QPainter *painter, const QRectF &iconRect, const qreal gr
     Q_UNUSED(gridUnit)
 }
 
+void Button::updateSize(int contentWidth, int contentHeight)
+{
+    const QSize size(
+        m_padding->left() + contentWidth + m_padding->right(),
+        m_padding->top() + contentHeight + m_padding->bottom()
+    );
+    setGeometry(QRect(QPoint(0, 0), size));
+}
+
 void Button::setHeight(int buttonHeight)
 {
-    const QSize size(qRound(buttonHeight * 1.33), buttonHeight);
-    setGeometry(QRect(QPoint(0, 0), size));
+    // For simplicity, don't count the 1.33:1 scaling in the left/right padding.
+    // The left/right padding is mainly for the border offset alignment.
+    updateSize(qRound(buttonHeight * 1.33), buttonHeight);
 }
 
 qreal Button::iconLineWidth(const qreal gridUnit) const
@@ -410,6 +424,16 @@ QColor Button::foregroundColor() const
 }
 
 
+QRectF Button::contentArea() const
+{
+    return geometry().adjusted(
+        m_padding->left(),
+        m_padding->top(),
+        -m_padding->right(),
+        -m_padding->bottom()
+    );
+}
+
 bool Button::animationEnabled() const
 {
     return m_animationEnabled;
@@ -460,6 +484,11 @@ void Button::setTransitionValue(qreal value)
         m_transitionValue = value;
         emit transitionValueChanged(value);
     }
+}
+
+QMargins* Button::padding()
+{
+    return m_padding;
 }
 
 void Button::updateAnimationState(bool hovered)

@@ -23,6 +23,8 @@
 #include <KDecoration2/DecorationButton>
 
 // Qt
+#include <QMargins>
+#include <QRectF>
 #include <QVariantAnimation>
 
 namespace Material
@@ -42,6 +44,7 @@ public:
     Q_PROPERTY(int animationDuration READ animationDuration WRITE setAnimationDuration NOTIFY animationDurationChanged)
     Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
     Q_PROPERTY(qreal transitionValue READ transitionValue WRITE setTransitionValue NOTIFY transitionValueChanged)
+    Q_PROPERTY(QMargins* padding READ padding NOTIFY paddingChanged)
 
     // Passed to DecorationButtonGroup in Decoration
     static KDecoration2::DecorationButton *create(KDecoration2::DecorationButtonType type, KDecoration2::Decoration *decoration, QObject *parent = nullptr);
@@ -55,6 +58,7 @@ public:
     void paint(QPainter *painter, const QRect &repaintRegion) override;
     virtual void paintIcon(QPainter *painter, const QRectF &iconRect, const qreal gridUnit);
 
+    virtual void updateSize(int contentWidth, int contentHeight);
     virtual void setHeight(int buttonHeight);
 
     virtual qreal iconLineWidth(const qreal gridUnit) const;
@@ -62,6 +66,8 @@ public:
 
     virtual QColor backgroundColor() const;
     virtual QColor foregroundColor() const;
+
+    QRectF contentArea() const;
 
     bool animationEnabled() const;
     void setAnimationEnabled(bool value);
@@ -75,6 +81,8 @@ public:
     qreal transitionValue() const;
     void setTransitionValue(qreal value);
 
+    QMargins* padding();
+
 private Q_SLOTS:
     void updateAnimationState(bool hovered);
 
@@ -83,12 +91,14 @@ signals:
     void animationDurationChanged();
     void opacityChanged();
     void transitionValueChanged(qreal);
+    void paddingChanged();
 
 private:
     bool m_animationEnabled;
     QVariantAnimation *m_animation;
     qreal m_opacity;
     qreal m_transitionValue;
+    QMargins *m_padding;
     bool m_isGtkButton;
 };
 
