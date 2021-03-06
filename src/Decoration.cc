@@ -456,6 +456,10 @@ void Decoration::updateButtonsGeometry()
     // Left
     m_leftButtons->setPos(QPointF(leftOffset, 0));
     m_leftButtons->setSpacing(0);
+    // if (!m_leftButtons->buttons().isEmpty()) {
+    //     auto *firstButon = qobject_cast<Button *>(m_leftButtons->buttons().front());
+    //     firstButon->padding()->setLeft(leftOffset);
+    // }
 
     // Right
     m_rightButtons->setPos(QPointF(
@@ -463,6 +467,10 @@ void Decoration::updateButtonsGeometry()
         0
     ));
     m_rightButtons->setSpacing(0);
+    // if (!m_rightButtons->buttons().isEmpty()) {
+    //     auto *lastButton = qobject_cast<Button *>(m_rightButtons->buttons().last());
+    //     lastButton->padding()->setRight(rightOffset);
+    // }
 
     // Menu
     if (!m_menuButtons->buttons().isEmpty()) {
