@@ -40,15 +40,17 @@ public:
         button->setVisible(true);
     }
     static void paintIcon(Button *button, QPainter *painter, const QRectF &iconRect, const qreal gridUnit) {
+        Q_UNUSED(gridUnit)
+        painter->setRenderHints(QPainter::Antialiasing, true);
         button->setPenWidth(painter, gridUnit, 1.25);
 
-        painter->translate( iconRect.topLeft() );
-        painter->drawPolyline(  QVector<QPointF> {
-            QPointF( 0.5, 4.75 ) * gridUnit,
-            QPointF( 5.0, 0.25 ) * gridUnit,
-            QPointF( 9.5, 4.75 ) * gridUnit,
-            QPointF( 5.0, 9.75 ) * gridUnit,
-            QPointF( 0.5, 4.75 ) * gridUnit
+        int radius = qMin(iconRect.width(), iconRect.height()) / 2;
+        QPoint center(iconRect.center().toPoint());
+        painter->drawPolygon( QVector<QPointF> {
+            center + QPoint(-radius, 0),
+            center + QPoint(0, -radius),
+            center + QPoint(radius, 0),
+            center + QPoint(0, radius)
         });
     }
 };
