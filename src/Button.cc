@@ -180,7 +180,9 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
 
     // Buttons are coded assuming 24 units in size.
     const QRectF buttonRect = geometry();
-    const qreal iconScale = buttonRect.height()/24;
+    const QRectF contentRect = contentArea();
+
+    const qreal iconScale = contentRect.height()/24;
     int iconSize;
     if (m_isGtkButton) {
         // See: https://github.com/Zren/material-decoration/issues/22
@@ -202,7 +204,7 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
         iconSize = qRound(iconScale * 10);
     }
     QRectF iconRect = QRectF(0, 0, iconSize, iconSize);
-    iconRect.moveCenter(buttonRect.center().toPoint());
+    iconRect.moveCenter(contentRect.center().toPoint());
 
     const qreal gridUnit = iconRect.height()/10;
 
@@ -284,7 +286,7 @@ void Button::updateSize(int contentWidth, int contentHeight)
 {
     const QSize size(
         m_padding->left() + contentWidth + m_padding->right(),
-        contentHeight
+        m_padding->top() + contentHeight + m_padding->bottom()
     );
     setGeometry(QRect(QPoint(0, 0), size));
 }
@@ -421,6 +423,16 @@ QColor Button::foregroundColor() const
     return normalColor;
 }
 
+
+QRectF Button::contentArea() const
+{
+    return geometry().adjusted(
+        m_padding->left(),
+        m_padding->top(),
+        -m_padding->right(),
+        -m_padding->bottom()
+    );
+}
 
 bool Button::animationEnabled() const
 {

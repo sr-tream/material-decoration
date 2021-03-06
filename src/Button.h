@@ -24,6 +24,7 @@
 
 // Qt
 #include <QMargins>
+#include <QRectF>
 #include <QVariantAnimation>
 
 namespace Material
@@ -65,6 +66,8 @@ public:
 
     virtual QColor backgroundColor() const;
     virtual QColor foregroundColor() const;
+
+    QRectF contentArea() const;
 
     bool animationEnabled() const;
     void setAnimationEnabled(bool value);
