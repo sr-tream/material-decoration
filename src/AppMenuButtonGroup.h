@@ -45,6 +45,7 @@ public:
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
     Q_PROPERTY(int overflowing READ overflowing WRITE setOverflowing NOTIFY overflowingChanged)
     Q_PROPERTY(bool hovered READ hovered WRITE setHovered NOTIFY hoveredChanged)
+    Q_PROPERTY(bool showing READ showing WRITE setShowing NOTIFY showingChanged)
     Q_PROPERTY(bool alwaysShow READ alwaysShow WRITE setAlwaysShow NOTIFY alwaysShowChanged)
     Q_PROPERTY(bool animationEnabled READ animationEnabled WRITE setAnimationEnabled NOTIFY animationEnabledChanged)
     Q_PROPERTY(int animationDuration READ animationDuration WRITE setAnimationDuration NOTIFY animationDurationChanged)
@@ -59,6 +60,9 @@ public:
     bool hovered() const;
     void setHovered(bool value);
 
+    bool showing() const;
+    void setShowing(bool value);
+
     bool alwaysShow() const;
     void setAlwaysShow(bool value);
 
@@ -71,6 +75,8 @@ public:
     qreal opacity() const;
     void setOpacity(qreal value);
 
+    bool isMenuOpen() const;
+
     KDecoration2::DecorationButton* buttonAt(int x, int y) const;
 
     void unPressAllButtons();
@@ -80,11 +86,11 @@ public slots:
     void updateOverflow(QRectF availableRect);
     void trigger(int index);
     void triggerOverflow();
-    void updateOpacity();
+    void updateShowing();
     void onMenuAboutToHide();
 
 private slots:
-    void onHoveredChanged(bool hovered);
+    void onShowingChanged(bool hovered);
 
 signals:
     void menuUpdated();
@@ -94,6 +100,7 @@ signals:
     void currentIndexChanged();
     void overflowingChanged();
     void hoveredChanged(bool);
+    void showingChanged(bool);
     void alwaysShowChanged(bool);
     void animationEnabledChanged(bool);
     void animationDurationChanged(int);
@@ -110,6 +117,7 @@ private:
     int m_overflowIndex;
     bool m_overflowing;
     bool m_hovered;
+    bool m_showing;
     bool m_alwaysShow;
     bool m_animationEnabled;
     QVariantAnimation *m_animation;

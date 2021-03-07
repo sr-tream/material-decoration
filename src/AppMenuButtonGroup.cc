@@ -48,20 +48,24 @@ AppMenuButtonGroup::AppMenuButtonGroup(Decoration *decoration)
     , m_currentIndex(-1)
     , m_overflowIndex(-1)
     , m_hovered(false)
+    , m_showing(true)
     , m_alwaysShow(true)
     , m_animationEnabled(false)
     , m_animation(new QVariantAnimation(this))
     , m_opacity(1)
 {
-    connect(this, &AppMenuButtonGroup::hoveredChanged, this,
-        [this](bool hovered) {
-            onHoveredChanged(hovered);
-            // update();
-        });
+    // Assign showing and opacity before we bind the onShowingChanged animation.
+    updateShowing();
+    setOpacity(m_showing ? 1 : 0);
 
-    updateOpacity();
+    connect(this, &AppMenuButtonGroup::hoveredChanged,
+            this, &AppMenuButtonGroup::updateShowing);
     connect(this, &AppMenuButtonGroup::alwaysShowChanged,
-            this, &AppMenuButtonGroup::updateOpacity);
+            this, &AppMenuButtonGroup::updateShowing);
+    connect(this, &AppMenuButtonGroup::currentIndexChanged,
+            this, &AppMenuButtonGroup::updateShowing);
+    connect(this, &AppMenuButtonGroup::showingChanged,
+            this, &AppMenuButtonGroup::onShowingChanged);
 
     m_animationEnabled = decoration->animationsEnabled();
     m_animation->setDuration(decoration->animationsDuration());
@@ -127,6 +131,20 @@ void AppMenuButtonGroup::setHovered(bool value)
         m_hovered = value;
         // qCDebug(category) << "setHovered" << m_hovered;
         emit hoveredChanged(value);
+    }
+}
+
+bool AppMenuButtonGroup::showing() const
+{
+    return m_showing;
+}
+
+void AppMenuButtonGroup::setShowing(bool value)
+{
+    if (m_showing != value) {
+        m_showing = value;
+        // qCDebug(category) << "setShowing" << m_showing;
+        emit showingChanged(value);
     }
 }
 
@@ -489,6 +507,11 @@ bool AppMenuButtonGroup::eventFilter(QObject *watched, QEvent *event)
     return false;
 }
 
+bool AppMenuButtonGroup::isMenuOpen() const
+{
+    return 0 <= m_currentIndex;
+}
+
 void AppMenuButtonGroup::unPressAllButtons()
 {
     // qCDebug(category) << "AppMenuButtonGroup::unPressAllButtons";
@@ -501,9 +524,10 @@ void AppMenuButtonGroup::unPressAllButtons()
     }
 }
 
-void AppMenuButtonGroup::updateOpacity()
+void AppMenuButtonGroup::updateShowing()
 {
-    setOpacity(m_alwaysShow || m_hovered ? 1 : 0);
+    setShowing(m_alwaysShow || m_hovered || isMenuOpen());
+    // setOpacity(m_showing ? 1 : 0);
 }
 
 void AppMenuButtonGroup::onMenuAboutToHide()
@@ -514,23 +538,19 @@ void AppMenuButtonGroup::onMenuAboutToHide()
     setCurrentIndex(-1);
 }
 
-void AppMenuButtonGroup::onHoveredChanged(bool hovered)
+void AppMenuButtonGroup::onShowingChanged(bool showing)
 {
-    if (m_alwaysShow) {
-        setOpacity(1);
-    } else {
-        if (m_animationEnabled) {
-            QAbstractAnimation::Direction dir = hovered ? QAbstractAnimation::Forward : QAbstractAnimation::Backward;
-            if (m_animation->state() == QAbstractAnimation::Running && m_animation->direction() != dir) {
-                m_animation->stop();
-            }
-            m_animation->setDirection(dir);
-            if (m_animation->state() != QAbstractAnimation::Running) {
-                m_animation->start();
-            }
-        } else {
-            setOpacity(hovered ? 1 : 0);
+    if (m_animationEnabled) {
+        QAbstractAnimation::Direction dir = showing ? QAbstractAnimation::Forward : QAbstractAnimation::Backward;
+        if (m_animation->state() == QAbstractAnimation::Running && m_animation->direction() != dir) {
+            m_animation->stop();
         }
+        m_animation->setDirection(dir);
+        if (m_animation->state() != QAbstractAnimation::Running) {
+            m_animation->start();
+        }
+    } else {
+        setOpacity(showing ? 1 : 0);
     }
 }
 

@@ -67,7 +67,7 @@ QColor AppMenuButton::backgroundColor() const
 {
     const auto *buttonGroup = qobject_cast<AppMenuButtonGroup *>(parent());
     if (buttonGroup
-        && buttonGroup->currentIndex() >= 0
+        && buttonGroup->isMenuOpen()
         && buttonGroup->currentIndex() != m_buttonIndex
     ) {
         return Qt::transparent;
@@ -80,7 +80,7 @@ QColor AppMenuButton::foregroundColor() const
 {
     const auto *buttonGroup = qobject_cast<AppMenuButtonGroup *>(parent());
     if (buttonGroup
-        && buttonGroup->currentIndex() >= 0
+        && buttonGroup->isMenuOpen()
         && buttonGroup->currentIndex() != m_buttonIndex
     ) {
         const auto *deco = qobject_cast<Decoration *>(decoration());
