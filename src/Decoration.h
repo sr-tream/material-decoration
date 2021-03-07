@@ -86,6 +86,7 @@ private:
     void updateButtonAnimation();
     void updateShadow();
 
+    bool menuAlwaysShow() const;
     bool animationsEnabled() const;
     int animationsDuration() const;
     int buttonPadding() const;

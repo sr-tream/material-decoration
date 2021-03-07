@@ -54,18 +54,20 @@ AppMenuButtonGroup::AppMenuButtonGroup(Decoration *decoration)
     , m_animation(new QVariantAnimation(this))
     , m_opacity(1)
 {
-    // Assign showing and opacity before we bind the onShowingChanged animation.
+    // Assign showing and opacity before we bind the onShowingChanged animation
+    // so that new windows do not animate.
+    setAlwaysShow(decoration->menuAlwaysShow());
     updateShowing();
     setOpacity(m_showing ? 1 : 0);
 
+    connect(this, &AppMenuButtonGroup::showingChanged,
+            this, &AppMenuButtonGroup::onShowingChanged);
     connect(this, &AppMenuButtonGroup::hoveredChanged,
             this, &AppMenuButtonGroup::updateShowing);
     connect(this, &AppMenuButtonGroup::alwaysShowChanged,
             this, &AppMenuButtonGroup::updateShowing);
     connect(this, &AppMenuButtonGroup::currentIndexChanged,
             this, &AppMenuButtonGroup::updateShowing);
-    connect(this, &AppMenuButtonGroup::showingChanged,
-            this, &AppMenuButtonGroup::onShowingChanged);
 
     m_animationEnabled = decoration->animationsEnabled();
     m_animation->setDuration(decoration->animationsDuration());
@@ -101,7 +103,7 @@ void AppMenuButtonGroup::setCurrentIndex(int set)
 {
     if (m_currentIndex != set) {
         m_currentIndex = set;
-        // qCDebug(category) << "setCurrentIndex" << m_currentIndex;
+        // qCDebug(category) << this << "setCurrentIndex" << m_currentIndex;
         emit currentIndexChanged();
     }
 }
@@ -115,7 +117,7 @@ void AppMenuButtonGroup::setOverflowing(bool set)
 {
     if (m_overflowing != set) {
         m_overflowing = set;
-        // qCDebug(category) << "setOverflowing" << m_overflowing;
+        // qCDebug(category) << this << "setOverflowing" << m_overflowing;
         emit overflowingChanged();
     }
 }
@@ -129,7 +131,7 @@ void AppMenuButtonGroup::setHovered(bool value)
 {
     if (m_hovered != value) {
         m_hovered = value;
-        // qCDebug(category) << "setHovered" << m_hovered;
+        // qCDebug(category) << this << "setHovered" << m_hovered;
         emit hoveredChanged(value);
     }
 }
@@ -143,7 +145,7 @@ void AppMenuButtonGroup::setShowing(bool value)
 {
     if (m_showing != value) {
         m_showing = value;
-        // qCDebug(category) << "setShowing" << m_showing;
+        // qCDebug(category) << this << "setShowing" << m_showing << "alwaysShow" << m_alwaysShow << "currentIndex" << m_currentIndex << "opacity" << m_opacity;
         emit showingChanged(value);
     }
 }
@@ -157,7 +159,7 @@ void AppMenuButtonGroup::setAlwaysShow(bool value)
 {
     if (m_alwaysShow != value) {
         m_alwaysShow = value;
-        // qCDebug(category) << "setAlwaysShow" << m_alwaysShow;
+        // qCDebug(category) << this << "setAlwaysShow" << m_alwaysShow;
         emit alwaysShowChanged(value);
     }
 }
@@ -527,7 +529,6 @@ void AppMenuButtonGroup::unPressAllButtons()
 void AppMenuButtonGroup::updateShowing()
 {
     setShowing(m_alwaysShow || m_hovered || isMenuOpen());
-    // setOpacity(m_showing ? 1 : 0);
 }
 
 void AppMenuButtonGroup::onMenuAboutToHide()

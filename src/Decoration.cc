@@ -219,7 +219,6 @@ void Decoration::init()
         &Button::create);
 
     m_menuButtons = new AppMenuButtonGroup(this);
-    m_menuButtons->setAlwaysShow(m_internalSettings->menuAlwaysShow());
     connect(m_menuButtons, &AppMenuButtonGroup::menuUpdated,
             this, &Decoration::updateButtonsGeometry);
     connect(m_menuButtons, &AppMenuButtonGroup::opacityChanged,
@@ -596,6 +595,11 @@ void Decoration::updateShadow()
     s_cachedShadow->setShadow(shadowTexture);
 
     setShadow(s_cachedShadow);
+}
+
+bool Decoration::menuAlwaysShow() const
+{
+    return m_internalSettings->menuAlwaysShow();
 }
 
 bool Decoration::animationsEnabled() const
