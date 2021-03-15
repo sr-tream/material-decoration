@@ -20,6 +20,7 @@
 // own
 #include "AppMenuButtonGroup.h"
 #include "Material.h"
+#include "BuildConfig.h"
 #include "AppMenuModel.h"
 #include "Decoration.h"
 #include "AppMenuButton.h"
@@ -243,6 +244,14 @@ void AppMenuButtonGroup::resetButtons()
     emit menuUpdated();
 }
 
+void AppMenuButtonGroup::initAppMenuModel()
+{
+    m_appMenuModel = new AppMenuModel(this);
+    connect(m_appMenuModel, &AppMenuModel::modelReset,
+        this, &AppMenuButtonGroup::updateAppMenuModel);
+    // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
+}
+
 void AppMenuButtonGroup::updateAppMenuModel()
 {
     auto *deco = qobject_cast<Decoration *>(decoration());
@@ -300,15 +309,15 @@ void AppMenuButtonGroup::updateAppMenuModel()
     } else {
         // Init AppMenuModel
         // qCDebug(category) << "windowId" << decoratedClient->windowId();
-        WId windowId = decoratedClient->windowId();
-        if (windowId != 0) {
-            m_appMenuModel = new AppMenuModel(this);
-            connect(m_appMenuModel, &AppMenuModel::modelReset,
-                this, &AppMenuButtonGroup::updateAppMenuModel);
-
-            // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
-            m_appMenuModel->setWinId(windowId);
-            // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
+        if (KWindowSystem::isPlatformX11()) {
+#if HAVE_X11
+            WId windowId = decoratedClient->windowId();
+            if (windowId != 0) {
+                initAppMenuModel();
+                m_appMenuModel->setWinId(windowId);
+                // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
+            }
+#endif
         }
     }
 }

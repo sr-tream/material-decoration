@@ -82,6 +82,7 @@ public:
     void unPressAllButtons();
 
 public slots:
+    void initAppMenuModel();
     void updateAppMenuModel();
     void updateOverflow(QRectF availableRect);
     void trigger(int index);
