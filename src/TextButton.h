@@ -37,7 +37,6 @@ public:
     ~TextButton() override;
 
     Q_PROPERTY(QAction* action READ action WRITE setAction NOTIFY actionChanged)
-    Q_PROPERTY(int horzPadding READ horzPadding WRITE setHorzPadding NOTIFY horzPaddingChanged)
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
 
     void paintIcon(QPainter *painter, const QRectF &iconRect, const qreal gridUnit) override;
@@ -47,9 +46,6 @@ public:
     QAction* action() const;
     void setAction(QAction *set);
 
-    int horzPadding() const;
-    void setHorzPadding(int set);
-
     QString text() const;
     void setText(const QString set);
 
@@ -58,12 +54,10 @@ public:
 
 signals:
     void actionChanged();
-    void horzPaddingChanged();
     void textChanged();
 
 private:
     QAction *m_action;
-    int m_horzPadding;
     QString m_text;
 };
 

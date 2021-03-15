@@ -40,9 +40,14 @@ namespace Material
 TextButton::TextButton(Decoration *decoration, const int buttonIndex, QObject *parent)
     : AppMenuButton(decoration, buttonIndex, parent)
     , m_action(nullptr)
-    , m_horzPadding(4) // TODO: Scale by DPI
     , m_text(QStringLiteral("Menu"))
 {
+    const auto *deco = qobject_cast<Decoration *>(decoration);
+
+    const int horzPadding = deco->appMenuButtonHorzPadding();
+    padding()->setLeft(horzPadding);
+    padding()->setRight(horzPadding);
+
     setVisible(true);
 }
 
@@ -95,19 +100,6 @@ void TextButton::setAction(QAction *set)
     }
 }
 
-int TextButton::horzPadding() const
-{
-    return m_horzPadding;
-}
-
-void TextButton::setHorzPadding(int set)
-{
-    if (m_horzPadding != set) {
-        m_horzPadding = set;
-        emit horzPaddingChanged();
-    }
-}
-
 QString TextButton::text() const
 {
     return m_text;
@@ -133,9 +125,7 @@ void TextButton::setHeight(int buttonHeight)
 void TextButton::updateGeometry()
 {
     const QSize textSize = getTextSize();
-    const QSize size = textSize + QSize(m_horzPadding * 2, 0);
-    const QRect rect(geometry().topLeft().toPoint(), size);
-    setGeometry(rect);
+    updateSize(textSize.width(), textSize.height());
 }
 
 

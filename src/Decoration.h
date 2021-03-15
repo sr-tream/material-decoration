@@ -93,6 +93,7 @@ private:
     int animationsDuration() const;
     int buttonPadding() const;
     int titleBarHeight() const;
+    int appMenuButtonHorzPadding() const;
     int appMenuCaptionSpacing() const;
     int captionMinWidth() const;
 

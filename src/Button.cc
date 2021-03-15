@@ -288,7 +288,7 @@ void Button::updateSize(int contentWidth, int contentHeight)
         m_padding->left() + contentWidth + m_padding->right(),
         m_padding->top() + contentHeight + m_padding->bottom()
     );
-    setGeometry(QRect(QPoint(0, 0), size));
+    setGeometry(QRect(geometry().topLeft().toPoint(), size));
 }
 
 void Button::setHeight(int buttonHeight)

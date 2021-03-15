@@ -637,6 +637,11 @@ int Decoration::titleBarHeight() const
     return buttonPadding()*2 + fontMetrics.height();
 }
 
+int Decoration::appMenuButtonHorzPadding() const
+{
+    return settings()->smallSpacing();
+}
+
 int Decoration::appMenuCaptionSpacing() const
 {
     return settings()->largeSpacing() * 4;
