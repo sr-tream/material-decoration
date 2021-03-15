@@ -19,6 +19,7 @@
 #pragma once
 
 // own
+#include "BuildConfig.h"
 #include "AppMenuButtonGroup.h"
 #include "InternalSettings.h"
 
@@ -35,8 +36,9 @@
 #include <QWheelEvent>
 #include <QVariant>
 
-// X11
+#if HAVE_X11
 #include <xcb/xcb.h>
+#endif
 
 
 namespace Material
@@ -128,7 +130,10 @@ private:
     QSharedPointer<InternalSettings> m_internalSettings;
 
     QPoint m_pressedPoint;
+
+#if HAVE_X11
     xcb_atom_t m_moveResizeAtom = 0;
+#endif
 
     friend class AppMenuButtonGroup;
     friend class Button;

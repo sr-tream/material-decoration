@@ -21,6 +21,7 @@
 // own
 #include "Decoration.h"
 #include "Material.h"
+#include "BuildConfig.h"
 #include "AppMenuButtonGroup.h"
 #include "BoxShadowHelper.h"
 #include "Button.h"
@@ -722,28 +723,35 @@ QPoint Decoration::windowPos() const
     const auto *decoratedClient = client().toStrongRef().data();
     WId windowId = decoratedClient->windowId();
 
-    //--- From: BreezeSizeGrip.cpp
-    /*
-    get root position matching position
-    need to use xcb because the embedding of the widget
-    breaks QT's mapToGlobal and other methods
-    */
-    auto connection( QX11Info::connection() );
-    xcb_get_geometry_cookie_t cookie( xcb_get_geometry( connection, windowId ) );
-    ScopedPointer<xcb_get_geometry_reply_t> reply( xcb_get_geometry_reply( connection, cookie, nullptr ) );
-    if (reply) {
-        // translate coordinates
-        xcb_translate_coordinates_cookie_t coordCookie( xcb_translate_coordinates(
-            connection, windowId, reply.data()->root,
-            -reply.data()->border_width,
-            -reply.data()->border_width ) );
+    if (KWindowSystem::isPlatformX11()) {
+#if HAVE_X11
+        //--- From: BreezeSizeGrip.cpp
+        /*
+        get root position matching position
+        need to use xcb because the embedding of the widget
+        breaks QT's mapToGlobal and other methods
+        */
+        auto connection( QX11Info::connection() );
+        xcb_get_geometry_cookie_t cookie( xcb_get_geometry( connection, windowId ) );
+        ScopedPointer<xcb_get_geometry_reply_t> reply( xcb_get_geometry_reply( connection, cookie, nullptr ) );
+        if (reply) {
+            // translate coordinates
+            xcb_translate_coordinates_cookie_t coordCookie( xcb_translate_coordinates(
+                connection, windowId, reply.data()->root,
+                -reply.data()->border_width,
+                -reply.data()->border_width ) );
 
-        ScopedPointer< xcb_translate_coordinates_reply_t> coordReply( xcb_translate_coordinates_reply( connection, coordCookie, nullptr ) );
+            ScopedPointer< xcb_translate_coordinates_reply_t> coordReply( xcb_translate_coordinates_reply( connection, coordCookie, nullptr ) );
 
-        if (coordReply) {
-            return QPoint(coordReply.data()->dst_x, coordReply.data()->dst_y);
+            if (coordReply) {
+                return QPoint(coordReply.data()->dst_x, coordReply.data()->dst_y);
+            }
         }
+#else
+        Q_UNUSED(windowId)
+#endif
     }
+
     return QPoint(0, 0);
 }
 
@@ -783,71 +791,80 @@ void Decoration::sendMoveEvent(const QPoint pos)
         - QPoint(0, titleBarHeight())
         + pos;
 
-    //--- From: BreezeSizeGrip.cpp
-    auto connection(QX11Info::connection());
+    if (KWindowSystem::isPlatformX11()) {
+#if HAVE_X11
+        //--- From: BreezeSizeGrip.cpp
+        auto connection(QX11Info::connection());
 
 
-    // move/resize atom
-    if (!m_moveResizeAtom) {
-        // create atom if not found
-        const QString atomName( "_NET_WM_MOVERESIZE" );
-        xcb_intern_atom_cookie_t cookie( xcb_intern_atom( connection, false, atomName.size(), qPrintable( atomName ) ) );
-        ScopedPointer<xcb_intern_atom_reply_t> reply( xcb_intern_atom_reply( connection, cookie, nullptr ) );
-        m_moveResizeAtom = reply ? reply->atom : 0;
+        // move/resize atom
+        if (!m_moveResizeAtom) {
+            // create atom if not found
+            const QString atomName( "_NET_WM_MOVERESIZE" );
+            xcb_intern_atom_cookie_t cookie( xcb_intern_atom( connection, false, atomName.size(), qPrintable( atomName ) ) );
+            ScopedPointer<xcb_intern_atom_reply_t> reply( xcb_intern_atom_reply( connection, cookie, nullptr ) );
+            m_moveResizeAtom = reply ? reply->atom : 0;
+        }
+        if (!m_moveResizeAtom) {
+            return;
+        }
+
+        // button release event
+        xcb_button_release_event_t releaseEvent;
+        memset(&releaseEvent, 0, sizeof(releaseEvent));
+
+        releaseEvent.response_type = XCB_BUTTON_RELEASE;
+        releaseEvent.event =  windowId;
+        releaseEvent.child = XCB_WINDOW_NONE;
+        releaseEvent.root = QX11Info::appRootWindow();
+        releaseEvent.event_x = pos.x();
+        releaseEvent.event_y = pos.y();
+        releaseEvent.root_x = globalPos.x();
+        releaseEvent.root_y = globalPos.y();
+        releaseEvent.detail = XCB_BUTTON_INDEX_1;
+        releaseEvent.state = XCB_BUTTON_MASK_1;
+        releaseEvent.time = XCB_CURRENT_TIME;
+        releaseEvent.same_screen = true;
+        xcb_send_event(
+            connection,
+            false,
+            windowId,
+            XCB_EVENT_MASK_BUTTON_RELEASE,
+            reinterpret_cast<const char*>(&releaseEvent)
+        );
+
+        xcb_ungrab_pointer(connection, XCB_TIME_CURRENT_TIME);
+
+        // move resize event
+        xcb_client_message_event_t clientMessageEvent;
+        memset(&clientMessageEvent, 0, sizeof(clientMessageEvent));
+
+        clientMessageEvent.response_type = XCB_CLIENT_MESSAGE;
+        clientMessageEvent.type = m_moveResizeAtom;
+        clientMessageEvent.format = 32;
+        clientMessageEvent.window = windowId;
+        clientMessageEvent.data.data32[0] = globalPos.x();
+        clientMessageEvent.data.data32[1] = globalPos.y();
+        clientMessageEvent.data.data32[2] = 8; // _NET_WM_MOVERESIZE_MOVE
+        clientMessageEvent.data.data32[3] = Qt::LeftButton;
+        clientMessageEvent.data.data32[4] = 0;
+
+        xcb_send_event(
+            connection,
+            false,
+            QX11Info::appRootWindow(),
+            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
+            reinterpret_cast<const char*>(&clientMessageEvent)
+        );
+
+        xcb_flush(connection);
+#else
+        Q_UNUSED(windowId)
+        Q_UNUSED(globalPos)
+#endif
+    } else {
+        // Not X11
     }
-    if (!m_moveResizeAtom) {
-        return;
-    }
-
-    // button release event
-    xcb_button_release_event_t releaseEvent;
-    memset(&releaseEvent, 0, sizeof(releaseEvent));
-
-    releaseEvent.response_type = XCB_BUTTON_RELEASE;
-    releaseEvent.event =  windowId;
-    releaseEvent.child = XCB_WINDOW_NONE;
-    releaseEvent.root = QX11Info::appRootWindow();
-    releaseEvent.event_x = pos.x();
-    releaseEvent.event_y = pos.y();
-    releaseEvent.root_x = globalPos.x();
-    releaseEvent.root_y = globalPos.y();
-    releaseEvent.detail = XCB_BUTTON_INDEX_1;
-    releaseEvent.state = XCB_BUTTON_MASK_1;
-    releaseEvent.time = XCB_CURRENT_TIME;
-    releaseEvent.same_screen = true;
-    xcb_send_event(
-        connection,
-        false,
-        windowId,
-        XCB_EVENT_MASK_BUTTON_RELEASE,
-        reinterpret_cast<const char*>(&releaseEvent)
-    );
-
-    xcb_ungrab_pointer(connection, XCB_TIME_CURRENT_TIME);
-
-    // move resize event
-    xcb_client_message_event_t clientMessageEvent;
-    memset(&clientMessageEvent, 0, sizeof(clientMessageEvent));
-
-    clientMessageEvent.response_type = XCB_CLIENT_MESSAGE;
-    clientMessageEvent.type = m_moveResizeAtom;
-    clientMessageEvent.format = 32;
-    clientMessageEvent.window = windowId;
-    clientMessageEvent.data.data32[0] = globalPos.x();
-    clientMessageEvent.data.data32[1] = globalPos.y();
-    clientMessageEvent.data.data32[2] = 8; // _NET_WM_MOVERESIZE_MOVE
-    clientMessageEvent.data.data32[3] = Qt::LeftButton;
-    clientMessageEvent.data.data32[4] = 0;
-
-    xcb_send_event(
-        connection,
-        false,
-        QX11Info::appRootWindow(),
-        XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
-        reinterpret_cast<const char*>(&clientMessageEvent)
-    );
-
-    xcb_flush(connection);
 }
 
 void Decoration::paintFrameBackground(QPainter *painter, const QRect &repaintRegion) const

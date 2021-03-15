@@ -26,11 +26,6 @@
 #include "Material.h"
 #include "BuildConfig.h"
 
-#if HAVE_X11
-#include <QX11Info>
-#include <xcb/xcb.h>
-#endif
-
 // Qt
 #include <QAction>
 #include <QDebug>
@@ -42,6 +37,11 @@
 
 // libdbusmenuqt
 #include <dbusmenuimporter.h>
+
+#if HAVE_X11
+#include <QX11Info>
+#include <xcb/xcb.h>
+#endif
 
 
 namespace Material
