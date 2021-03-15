@@ -951,6 +951,10 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
 {
     Q_UNUSED(repaintRegion)
 
+    if (m_internalSettings->titleAlignment() == InternalSettings::TitleHidden) {
+        return;
+    }
+
     const auto *decoratedClient = client().toStrongRef().data();
 
     const int textWidth = settings()->fontMetrics().boundingRect(decoratedClient->caption()).width();

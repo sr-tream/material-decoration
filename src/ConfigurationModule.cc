@@ -87,6 +87,7 @@ void ConfigurationModule::init()
     titleAlignment->addItem(i18nd("breeze_kwin_deco", "Center"));
     titleAlignment->addItem(i18nd("breeze_kwin_deco", "Center (Full Width)"));
     titleAlignment->addItem(i18nd("breeze_kwin_deco", "Right"));
+    titleAlignment->addItem(i18n("Hidden"));
     titleAlignment->setObjectName(QStringLiteral("kcfg_TitleAlignment"));
     generalForm->addRow(i18nd("breeze_kwin_deco", "Tit&le alignment:"), titleAlignment);
 

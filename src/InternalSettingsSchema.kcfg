@@ -23,6 +23,7 @@
                 <choice name="AlignCenter" />
                 <choice name="AlignCenterFullWidth" />
                 <choice name="AlignRight" />
+                <choice name="TitleHidden" />
             </choices>
             <default>AlignCenterFullWidth</default>
         </entry>
