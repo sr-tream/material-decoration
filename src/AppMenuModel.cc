@@ -82,13 +82,16 @@ AppMenuModel::AppMenuModel(QObject *parent)
         onActiveWindowChanged(m_winId.toUInt());
     });
 
-    // connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuModel::onActiveWindowChanged);
+    // Select non-deprecated overloaded method. Uses coding pattern from:
+    // https://github.com/KDE/plasma-workspace/blame/master/libtaskmanager/xwindowsystemeventbatcher.cpp#L42
+    void (KWindowSystem::*myWindowChangeSignal)(WId window, NET::Properties properties, NET::Properties2 properties2) = &KWindowSystem::windowChanged;
     connect(KWindowSystem::self()
-            , static_cast<void (KWindowSystem::*)(WId)>(&KWindowSystem::windowChanged)
+            , myWindowChangeSignal
             , this
             , &AppMenuModel::onWindowChanged);
+
     connect(KWindowSystem::self()
-            , static_cast<void (KWindowSystem::*)(WId)>(&KWindowSystem::windowRemoved)
+            , &KWindowSystem::windowRemoved
             , this
             , &AppMenuModel::onWindowRemoved);
 
