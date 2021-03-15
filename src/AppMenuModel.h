@@ -54,10 +54,16 @@ class AppMenuModel : public QAbstractListModel, public QAbstractNativeEventFilte
     Q_PROPERTY(QRect screenGeometry READ screenGeometry WRITE setScreenGeometry NOTIFY screenGeometryChanged)
 
     Q_PROPERTY(QVariant winId READ winId WRITE setWinId NOTIFY winIdChanged)
+
 public:
     explicit AppMenuModel(QObject *parent = nullptr);
     ~AppMenuModel() override;
 
+private:
+    void x11Init();
+    void waylandInit();
+
+public:
     enum AppMenuRole
     {
         MenuRole = Qt::UserRole + 1, // TODO this should be Qt::DisplayRole

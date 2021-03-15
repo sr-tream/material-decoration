@@ -74,10 +74,45 @@ AppMenuModel::AppMenuModel(QObject *parent)
     : QAbstractListModel(parent),
       m_serviceWatcher(new QDBusServiceWatcher(this))
 {
-    if (!KWindowSystem::isPlatformX11()) {
+    if (KWindowSystem::isPlatformX11()) {
+#if HAVE_X11
+        x11Init();
+#else
+        // Not compiled with X11
+        return;
+#endif
+
+    } else if (KWindowSystem::isPlatformWayland()) {
+#if HAVE_Wayland
+        // TODO
+        // waylandInit();
+        return;
+#else
+        // Not compiled with KWayland
+        return;
+#endif
+
+    } else {
+        // Not X11 or Wayland
         return;
     }
 
+    m_serviceWatcher->setConnection(QDBusConnection::sessionBus());
+    // If our current DBus connection gets lost, close the menu
+    // we'll select the new menu when the focus changes
+    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](const QString & serviceName) {
+        if (serviceName == m_serviceName) {
+            setMenuAvailable(false);
+            emit modelNeedsUpdate();
+        }
+    });
+}
+
+AppMenuModel::~AppMenuModel() = default;
+
+void AppMenuModel::x11Init()
+{
+#if HAVE_X11
     connect(this, &AppMenuModel::winIdChanged, this, [this] {
         onActiveWindowChanged(m_winId.toUInt());
     });
@@ -108,19 +143,15 @@ AppMenuModel::AppMenuModel(QObject *parent)
     });
 
     onActiveWindowChanged(KWindowSystem::activeWindow());
-
-    m_serviceWatcher->setConnection(QDBusConnection::sessionBus());
-    //if our current DBus connection gets lost, close the menu
-    //we'll select the new menu when the focus changes
-    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](const QString & serviceName) {
-        if (serviceName == m_serviceName) {
-            setMenuAvailable(false);
-            emit modelNeedsUpdate();
-        }
-    });
+#endif
 }
 
-AppMenuModel::~AppMenuModel() = default;
+void AppMenuModel::waylandInit()
+{
+#if HAVE_Wayland
+    // TODO
+#endif
+}
 
 bool AppMenuModel::filterByActive() const
 {
@@ -246,9 +277,8 @@ void AppMenuModel::onActiveWindowChanged(WId id)
         return;
     }
 
-#if HAVE_X11
-
     if (KWindowSystem::isPlatformX11()) {
+#if HAVE_X11
         auto *c = QX11Info::connection();
 
         auto getWindowPropertyString = [c](WId id, const QByteArray &name) -> QByteArray {
@@ -362,10 +392,13 @@ void AppMenuModel::onActiveWindowChanged(WId id)
         //no menu found, set it to unavailable
         setMenuAvailable(false);
         emit modelNeedsUpdate();
-    }
-
 #endif
 
+    } else if (KWindowSystem::isPlatformWayland()) {
+#if HAVE_Wayland
+        // TODO
+#endif
+    }
 }
 
 void AppMenuModel::onWindowChanged(WId id)

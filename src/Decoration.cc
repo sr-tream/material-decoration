@@ -750,6 +750,11 @@ QPoint Decoration::windowPos() const
 #else
         Q_UNUSED(windowId)
 #endif
+
+    } else if (KWindowSystem::isPlatformWayland()) {
+#if HAVE_Wayland
+        // TODO
+#endif
     }
 
     return QPoint(0, 0);
@@ -862,6 +867,12 @@ void Decoration::sendMoveEvent(const QPoint pos)
         Q_UNUSED(windowId)
         Q_UNUSED(globalPos)
 #endif
+
+    } else if (KWindowSystem::isPlatformWayland()) {
+#if HAVE_Wayland
+        // TODO
+#endif
+
     } else {
         // Not X11
     }

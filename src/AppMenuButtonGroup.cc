@@ -318,6 +318,10 @@ void AppMenuButtonGroup::updateAppMenuModel()
                 // qCDebug(category) << "AppMenuModel" << m_appMenuModel;
             }
 #endif
+        } else if (KWindowSystem::isPlatformWayland()) {
+#if HAVE_Wayland
+            // TODO
+#endif
         }
     }
 }
