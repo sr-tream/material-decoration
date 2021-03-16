@@ -410,8 +410,7 @@ void Decoration::updateResizeBorders()
 
 void Decoration::updateTitleBar()
 {
-    auto *decoratedClient = client().toStrongRef().data();
-    setTitleBar(QRect(0, 0, decoratedClient->width(), titleBarHeight()));
+    setTitleBar(titleBarRect());
 }
 
 void Decoration::updateTitleBarHoverState()
