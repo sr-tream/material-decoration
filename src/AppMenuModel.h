@@ -100,12 +100,13 @@ protected:
     bool nativeEventFilter(const QByteArray &eventType, void *message, long int *result) override;
 
 private Q_SLOTS:
-    void onActiveWindowChanged(WId id);
-    void onWindowChanged(WId id);
+    void onWinIdChanged();
+    void onX11ActiveWindowChanged(WId id);
+    void onX11WindowChanged(WId id);
     //! there are apps that are not releasing their menu properly after closing
     //! and as such their menu is still shown even though the app does not exist
     //! any more. Such apps are Java based e.g. smartgit
-    void onWindowRemoved(WId id);
+    void onX11WindowRemoved(WId id);
     void filterWindow(KWindowInfo &info);
 
     void setVisible(bool visible);
