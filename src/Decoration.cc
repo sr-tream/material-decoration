@@ -431,9 +431,11 @@ void Decoration::updateTitleBarHoverState()
 
 void Decoration::setButtonGroupHeight(KDecoration2::DecorationButtonGroup *buttonGroup, int buttonHeight)
 {
+    // int vertPadding = buttonPadding();
     for (int i = 0; i < buttonGroup->buttons().length(); i++) {
         auto *button = qobject_cast<Button *>(buttonGroup->buttons().value(i));
         button->setHeight(buttonHeight);
+        // button->setVertPadding(vertPadding);
     }
 }
 
