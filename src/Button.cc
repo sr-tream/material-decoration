@@ -491,6 +491,18 @@ QMargins* Button::padding()
     return m_padding;
 }
 
+void Button::setHorzPadding(int value)
+{
+    padding()->setLeft(value);
+    padding()->setRight(value);
+}
+
+void Button::setVertPadding(int value)
+{
+    padding()->setTop(value);
+    padding()->setBottom(value);
+}
+
 void Button::updateAnimationState(bool hovered)
 {
     if (m_animationEnabled) {
