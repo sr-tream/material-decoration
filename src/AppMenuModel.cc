@@ -2,7 +2,6 @@
  * Copyright 2016 Kai Uwe Broulik <kde@privat.broulik.de>
  * Copyright 2016 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
  *
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of
@@ -20,6 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************/
+
+// Based on:
+// https://invent.kde.org/plasma/plasma-workspace/-/blob/master/applets/appmenu/plugin/appmenumodel.cpp
+// https://github.com/psifidotos/applet-window-appmenu/blob/master/plugin/appmenumodel.cpp
 
 // own
 #include "AppMenuModel.h"
@@ -264,7 +267,6 @@ void AppMenuModel::onWinIdChanged()
         };
 
         if (updateMenuFromWindowIfHasMenu(id)) {
-            // filterWindow(info);
             return;
         }
 
@@ -336,7 +338,6 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
         if (m_importer) {
             QMetaObject::invokeMethod(m_importer, "updateMenu", Qt::QueuedConnection);
         }
-
         return;
     }
 
@@ -352,21 +353,19 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     m_importer = new KDBusMenuImporter(serviceName, menuObjectPath, this);
     QMetaObject::invokeMethod(m_importer, "updateMenu", Qt::QueuedConnection);
 
-    connect(m_importer.data(), &DBusMenuImporter::menuUpdated, this, [ = ](QMenu * menu) {
+    connect(m_importer.data(), &DBusMenuImporter::menuUpdated, this, [=](QMenu *menu) {
         m_menu = m_importer->menu();
-
         if (m_menu.isNull() || menu != m_menu) {
             return;
         }
 
-        //cache first layer of sub menus, which we'll be popping up
-        for (QAction *a : m_menu->actions()) {
+        // cache first layer of sub menus, which we'll be popping up
+        const auto actions = m_menu->actions();
+        for (QAction *a : actions) {
             // signal dataChanged when the action changes
             connect(a, &QAction::changed, this, [this, a] {
-                if (m_menuAvailable && m_menu)
-                {
+                if (m_menuAvailable && m_menu) {
                     const int actionIdx = m_menu->actions().indexOf(a);
-
                     if (actionIdx > -1) {
                         const QModelIndex modelIdx = index(actionIdx, 0);
                         emit dataChanged(modelIdx, modelIdx);
@@ -385,7 +384,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
         emit modelNeedsUpdate();
     });
 
-    connect(m_importer.data(), &DBusMenuImporter::actionActivationRequested, this, [this](QAction * action) {
+    connect(m_importer.data(), &DBusMenuImporter::actionActivationRequested, this, [this](QAction *action) {
         // TODO submenus
         if (!m_menuAvailable || !m_menu) {
             return;
@@ -393,9 +392,8 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
         const auto actions = m_menu->actions();
         auto it = std::find(actions.begin(), actions.end(), action);
-
         if (it != actions.end()) {
-            requestActivateIndex(it - actions.begin());
+            emit requestActivateIndex(it - actions.begin());
         }
     });
 }
