@@ -74,7 +74,9 @@ Button::Button(KDecoration2::DecorationButtonType type, Decoration *decoration, 
 
     // Animation based on SierraBreezeEnhanced
     // https://github.com/kupiqu/SierraBreezeEnhanced/blob/master/breezebutton.cpp#L45
-    m_animationEnabled = decoration->animationsEnabled();
+    // The GTK bridge needs animations disabled to render hover states. See Issue #50.
+    // https://invent.kde.org/plasma/kde-gtk-config/-/blob/master/kded/kwin_bridge/dummydecorationbridge.cpp#L35
+    m_animationEnabled = !m_isGtkButton && decoration->animationsEnabled();
     m_animation->setDuration(decoration->animationsDuration());
     m_animation->setStartValue(0.0);
     m_animation->setEndValue(1.0);
