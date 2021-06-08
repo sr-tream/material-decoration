@@ -321,6 +321,12 @@ QColor Button::backgroundColor() const
         return {};
     }
 
+    if (m_isGtkButton) {
+        // Breeze GTK has huge margins around the button. It looks better
+        // when we just change the fgColor on hover instead of the bgColor.
+        return Qt::transparent;
+    }
+
     //--- CloseButton
     if (type() == KDecoration2::DecorationButtonType::Close) {
         auto *decoratedClient = deco->client().toStrongRef().data();
@@ -395,7 +401,7 @@ QColor Button::foregroundColor() const
 
     //--- Checked
     if (isChecked() && type() != KDecoration2::DecorationButtonType::Maximize) {
-        QColor activeColor = KColorUtils::mix(
+        const QColor activeColor = KColorUtils::mix(
             deco->titleBarBackgroundColor(),
             deco->titleBarForegroundColor(),
             0.2);
@@ -410,15 +416,42 @@ QColor Button::foregroundColor() const
     }
 
     //--- Normal
-    QColor normalColor = KColorUtils::mix(
+    const QColor normalColor = KColorUtils::mix(
         deco->titleBarBackgroundColor(),
         deco->titleBarForegroundColor(),
         0.8);
 
     if (isPressed() || isHovered()) {
+        // Breeze GTK has huge margins around the button. It looks better
+        // when we just change the fgColor on hover instead of the bgColor.
+        QColor hoveredColor;
+        if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Close) {
+            auto *decoratedClient = deco->client().toStrongRef().data();
+            hoveredColor = decoratedClient->color(
+                KDecoration2::ColorGroup::Warning,
+                KDecoration2::ColorRole::Foreground
+            );
+        } else if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Maximize) {
+            const grayValue = qGray(deco->titleBarBackgroundColor().rgb());
+            if (grayValue < 128) { // Dark Bg
+                hoveredColor = QColor(100, 196, 86); // from SierraBreeze
+            } else { // Light Bg
+                hoveredColor = QColor(40, 200, 64); // from SierraBreeze
+            }
+        } else if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Minimize) {
+            const grayValue = qGray(deco->titleBarBackgroundColor().rgb());
+            if (grayValue < 128) {
+                hoveredColor = QColor(223, 192, 76); // from SierraBreeze
+            } else { // Light Bg
+                hoveredColor = QColor(255, 188, 48); // from SierraBreeze
+            }
+        } else {
+            hoveredColor = deco->titleBarForegroundColor();
+        }
+
         return KColorUtils::mix(
             normalColor,
-            deco->titleBarForegroundColor(),
+            hoveredColor,
             m_transitionValue);
     }
 
