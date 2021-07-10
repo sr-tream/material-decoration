@@ -432,14 +432,14 @@ QColor Button::foregroundColor() const
                 KDecoration2::ColorRole::Foreground
             );
         } else if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Maximize) {
-            const grayValue = qGray(deco->titleBarBackgroundColor().rgb());
+            const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
             if (grayValue < 128) { // Dark Bg
                 hoveredColor = QColor(100, 196, 86); // from SierraBreeze
             } else { // Light Bg
                 hoveredColor = QColor(40, 200, 64); // from SierraBreeze
             }
         } else if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Minimize) {
-            const grayValue = qGray(deco->titleBarBackgroundColor().rgb());
+            const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
             if (grayValue < 128) {
                 hoveredColor = QColor(223, 192, 76); // from SierraBreeze
             } else { // Light Bg
