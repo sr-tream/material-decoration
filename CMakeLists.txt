@@ -22,8 +22,12 @@ find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     DBus
 )
 include(ECMQtDeclareLoggingCategory)
-add_subdirectory (src/libdbusmenuqt)
 
+# Remove Qt 5.15 Deprecations
+# https://doc.qt.io/qt-6/portingguide.html
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+
+add_subdirectory (src/libdbusmenuqt)
 add_subdirectory (src)
 
 feature_summary(WHAT ALL)
