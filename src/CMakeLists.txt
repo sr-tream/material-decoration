@@ -81,9 +81,9 @@ add_library (materialdecoration MODULE
 target_link_libraries (materialdecoration
     PUBLIC
         dbusmenuqt
-        Qt5::Core
-        Qt5::Gui
-        Qt5::X11Extras
+        Qt::Core
+        Qt::Gui
+        Qt::X11Extras
         KF5::ConfigCore
         KF5::ConfigGui
         KF5::ConfigWidgets
