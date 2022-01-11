@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.16.0)
 project (material-decoration)
 
 add_definitions (-Wall -Werror)
