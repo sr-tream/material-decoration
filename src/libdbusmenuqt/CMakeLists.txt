@@ -1,19 +1,21 @@
 set(libdbusmenu_SRCS
-dbusmenuimporter.cpp
-dbusmenushortcut_p.cpp
-dbusmenutypes_p.cpp
-utils.cpp
+    dbusmenuimporter.cpp
+    dbusmenushortcut_p.cpp
+    dbusmenutypes_p.cpp
+    utils.cpp
 )
 
-ecm_qt_declare_logging_category(libdbusmenu_SRCS HEADER debug.h
-                                            IDENTIFIER DBUSMENUQT
-                                            CATEGORY_NAME org.kde.libdbusmenuqt
-                                            DEFAULT_SEVERITY Info)
+ecm_qt_declare_logging_category(libdbusmenu_SRCS
+    HEADER debug.h
+    IDENTIFIER DBUSMENUQT
+    CATEGORY_NAME org.kde.libdbusmenuqt
+    DEFAULT_SEVERITY Info
+)
 
 set_source_files_properties(com.canonical.dbusmenu.xml PROPERTIES
-   NO_NAMESPACE true
-   INCLUDE "dbusmenutypes_p.h"
-   CLASSNAME DBusMenuInterface
+    NO_NAMESPACE true
+    INCLUDE "dbusmenutypes_p.h"
+    CLASSNAME DBusMenuInterface
 )
 
 if (Qt6_FOUND)
