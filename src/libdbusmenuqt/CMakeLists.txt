@@ -15,7 +15,13 @@ set_source_files_properties(com.canonical.dbusmenu.xml PROPERTIES
    INCLUDE "dbusmenutypes_p.h"
    CLASSNAME DBusMenuInterface
 )
-qt_add_dbus_interface(libdbusmenu_SRCS com.canonical.dbusmenu.xml dbusmenu_interface)
+
+if (Qt6_FOUND)
+    qt_add_dbus_interface(libdbusmenu_SRCS com.canonical.dbusmenu.xml dbusmenu_interface)
+elseif(Qt5_FOUND)
+    qt5_add_dbus_interface(libdbusmenu_SRCS com.canonical.dbusmenu.xml dbusmenu_interface)
+endif()
+
 
 
 add_library(dbusmenuqt STATIC ${libdbusmenu_SRCS})
