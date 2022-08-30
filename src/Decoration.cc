@@ -50,7 +50,6 @@
 #include <xcb/xcb.h>
 #include <QX11Info>
 
-
 namespace Material
 {
 
@@ -200,6 +199,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
     if (settings()->borderSize() >= KDecoration2::BorderSize::Normal) {
         paintOutline(painter, repaintRegion);
     }
+    setBlurRegion( QRegion(this->titleBar()) );
 }
 
 void Decoration::init()
@@ -319,7 +319,7 @@ void Decoration::hoverEnterEvent(QHoverEvent *event)
 {
     KDecoration2::Decoration::hoverEnterEvent(event);
     qCDebug(category) << "Decoration::hoverEnterEvent" << event;
-
+    setBlurRegion( QRegion(this->titleBar()) );
     // m_menuButtons->setHovered(true);
 }
 
@@ -345,6 +345,7 @@ void Decoration::hoverMoveEvent(QHoverEvent *event)
     // } else if (wasHovered && contains) {
     //     // HoverMove
     // }
+    setBlurRegion( QRegion(this->titleBar()) );
 }
 
 void Decoration::mouseReleaseEvent(QMouseEvent *event)
@@ -353,6 +354,7 @@ void Decoration::mouseReleaseEvent(QMouseEvent *event)
     // qCDebug(category) << "Decoration::mouseReleaseEvent" << event;
 
     resetDragMove();
+    setBlurRegion( QRegion(this->titleBar()) );
 }
 
 void Decoration::hoverLeaveEvent(QHoverEvent *event)
@@ -361,7 +363,7 @@ void Decoration::hoverLeaveEvent(QHoverEvent *event)
     qCDebug(category) << "Decoration::hoverLeaveEvent" << event;
 
     resetDragMove();
-
+    setBlurRegion( QRegion(this->titleBar()) );
     // m_menuButtons->setHovered(false);
 }
 
