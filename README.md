@@ -1,4 +1,4 @@
-![Demo](data/preview.png)
+![Demo](data/changes.gif)
 
 ## material-decoration
 

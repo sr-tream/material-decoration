@@ -297,7 +297,7 @@ void Button::setHeight(int buttonHeight)
 {
     // For simplicity, don't count the 1.33:1 scaling in the left/right padding.
     // The left/right padding is mainly for the border offset alignment.
-    updateSize(qRound(buttonHeight * 1.2), buttonHeight);
+    updateSize(qRound(buttonHeight * 1.1), buttonHeight);
 }
 
 qreal Button::iconLineWidth(const qreal gridUnit) const
