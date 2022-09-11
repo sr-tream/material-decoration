@@ -35,7 +35,7 @@ namespace Material
          * as long as it isn't too visible.
          */
         // The standard pen stroke width for symbols.
-        static constexpr qreal Symbol = 1;
+        static constexpr qreal Symbol = 0.9;
     }
 
 } // namespace Material
