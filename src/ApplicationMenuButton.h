@@ -42,8 +42,8 @@ public:
 
         int spacing = qRound(gridUnit * 4);
         for (int i = -1; i <= 1; ++i) {
-            const QPointF left { iconRect.left(), iconRect.center().y() + i * spacing };
-            const QPointF right { iconRect.right(), iconRect.center().y() + i * spacing };
+            const QPointF left { iconRect.left(), iconRect.bottom() + i * spacing };
+            const QPointF right { iconRect.right(), iconRect.bottom() + i * spacing };
 
             painter->drawLine(left, right);
         }

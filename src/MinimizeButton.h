@@ -44,8 +44,8 @@ public:
         Q_UNUSED(gridUnit)
 
         painter->drawLine(
-            iconRect.left(), iconRect.center().y(),
-            iconRect.right(), iconRect.center().y());
+            iconRect.left(), iconRect.bottom(),
+            iconRect.right(), iconRect.bottom());
     }
 };
 

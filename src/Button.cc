@@ -199,11 +199,11 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
         // 15% top/bottom padding, 70% leftover for the icon.
         // 24 = 3.5 topPadding + 17 icon + 3.5 bottomPadding
         // 17/24 * 18 = 12.75
-        iconSize = qRound(iconScale * 17);
+        iconSize = qRound(iconScale * 15);
     } else {
         // 30% top/bottom padding, 40% leftover for the icon.
         // 24 = 7 topPadding + 10 icon + 7 bottomPadding
-        iconSize = qRound(iconScale * 10);
+        iconSize = qRound(iconScale * 11);
     }
     QRectF iconRect = QRectF(0, 0, iconSize, iconSize);
     iconRect.moveCenter(contentRect.center().toPoint());
@@ -297,7 +297,7 @@ void Button::setHeight(int buttonHeight)
 {
     // For simplicity, don't count the 1.33:1 scaling in the left/right padding.
     // The left/right padding is mainly for the border offset alignment.
-    updateSize(qRound(buttonHeight * 1.33), buttonHeight);
+    updateSize(qRound(buttonHeight * 1.2), buttonHeight);
 }
 
 qreal Button::iconLineWidth(const qreal gridUnit) const
@@ -321,12 +321,14 @@ QColor Button::backgroundColor() const
         return {};
     }
 
-    if (m_isGtkButton) {
+    //if (m_isGtkButton) {
         // Breeze GTK has huge margins around the button. It looks better
         // when we just change the fgColor on hover instead of the bgColor.
-        return Qt::transparent;
-    }
-
+       //return Qt::transparent;
+    //}
+if (type() == KDecoration2::DecorationButtonType::Close || type() == KDecoration2::DecorationButtonType::Maximize || type() == KDecoration2::DecorationButtonType::Minimize) {
+    return Qt::transparent;
+}
     //--- CloseButton
     if (type() == KDecoration2::DecorationButtonType::Close) {
         auto *decoratedClient = deco->client().toStrongRef().data();
@@ -425,27 +427,27 @@ QColor Button::foregroundColor() const
         // Breeze GTK has huge margins around the button. It looks better
         // when we just change the fgColor on hover instead of the bgColor.
         QColor hoveredColor;
-        if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Close) {
-            auto *decoratedClient = deco->client().toStrongRef().data();
-            hoveredColor = decoratedClient->color(
-                KDecoration2::ColorGroup::Warning,
-                KDecoration2::ColorRole::Foreground
-            );
-        } else if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Maximize) {
-            const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
-            if (grayValue < 128) { // Dark Bg
-                hoveredColor = QColor(100, 196, 86); // from SierraBreeze
-            } else { // Light Bg
-                hoveredColor = QColor(40, 200, 64); // from SierraBreeze
-            }
-        } else if (m_isGtkButton && type() == KDecoration2::DecorationButtonType::Minimize) {
-            const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
-            if (grayValue < 128) {
-                hoveredColor = QColor(223, 192, 76); // from SierraBreeze
-            } else { // Light Bg
-                hoveredColor = QColor(255, 188, 48); // from SierraBreeze
-            }
-        } else {
+         if (type() == KDecoration2::DecorationButtonType::Close) {
+             auto *decoratedClient = deco->client().toStrongRef().data();
+             hoveredColor = decoratedClient->color(
+                 KDecoration2::ColorGroup::Warning,
+                 KDecoration2::ColorRole::Foreground
+             );
+        // } else if (type() == KDecoration2::DecorationButtonType::Maximize) {
+        //     const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
+        //     if (grayValue < 128) { // Dark Bg
+        //         hoveredColor = QColor(100, 196, 86); // from SierraBreeze
+        //     } else { // Light Bg
+        //         hoveredColor = QColor(40, 200, 64); // from SierraBreeze
+        //     }
+        // } else if (type() == KDecoration2::DecorationButtonType::Minimize) {
+        //     const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
+        //     if (grayValue < 128) {
+        //         hoveredColor = QColor(223, 192, 76); // from SierraBreeze
+        //     } else { // Light Bg
+        //         hoveredColor = QColor(255, 188, 48); // from SierraBreeze
+        //     }
+         } else {
             hoveredColor = deco->titleBarForegroundColor();
         }
 

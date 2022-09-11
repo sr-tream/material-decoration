@@ -765,7 +765,7 @@ int Decoration::getTextWidth(const QString text, bool showMnemonic) const
     const QRect textRect(titleBarRect());
     int flags = showMnemonic ? Qt::TextShowMnemonic : Qt::TextHideMnemonic;
     const QRect boundingRect = fontMetrics.boundingRect(textRect, flags, text);
-    return boundingRect.width();
+    return boundingRect.width()+8;
 }
 
 //* scoped pointer convenience typedef
