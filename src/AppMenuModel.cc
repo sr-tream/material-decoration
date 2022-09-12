@@ -192,7 +192,7 @@ void AppMenuModel::setWinId(const QVariant &id)
     if (m_winId == id) {
         return;
     }
-    qCDebug(category) << "AppMenuModel::setWinId" << m_winId << " => " << id;
+    //qCDebug(category) << "AppMenuModel::setWinId" << m_winId << " => " << id;
     m_winId = id;
     emit winIdChanged();
 }
