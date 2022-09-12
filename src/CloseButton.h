@@ -45,7 +45,7 @@ public:
 
         painter->setRenderHints(QPainter::Antialiasing, true);
 
-        button->setPenWidth(painter, gridUnit, 1.10);
+        button->setPenWidth(painter, gridUnit, 1);
 
         painter->drawLine(iconRect.topLeft(), iconRect.bottomRight());
         painter->drawLine(iconRect.topRight(), iconRect.bottomLeft());
