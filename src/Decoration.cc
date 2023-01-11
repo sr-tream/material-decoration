@@ -34,6 +34,9 @@
 #include <KDecoration2/DecorationSettings>
 #include <KDecoration2/DecorationShadow>
 
+// KF
+#include <KWindowSystem>
+
 // Qt
 #include <QApplication>
 #include <QDebug>

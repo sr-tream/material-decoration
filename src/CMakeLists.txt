@@ -57,11 +57,13 @@ if(KF5Wayland_FOUND)
     set(Wayland_LIBRARIES KF5::WaylandClient)
 endif()
 
-
-# Discover KF5 version
-string(REGEX MATCH "\\.([^]]+)\\." KF5_MINOR_VERSION ${KF5_VERSION})
-string(REGEX REPLACE "\\." "" KF5_MINOR_VERSION ${KF5_MINOR_VERSION})
-message(STATUS "KF5 VERSION: ${KF5_VERSION} (MINOR_VERSION=${KF5_MINOR_VERSION})")
+# KF5 Version
+if(${KF5_VERSION} VERSION_GREATER_EQUAL "5.101.0")
+    set(HAVE_KF5_101 ON)
+else()
+    set(HAVE_KF5_101 OFF)
+endif()
+message(STATUS "HAVE_KF5_101: ${HAVE_KF5_101}")
 
 
 configure_file(BuildConfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/BuildConfig.h)
