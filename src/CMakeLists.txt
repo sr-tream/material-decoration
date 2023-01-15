@@ -57,13 +57,22 @@ if(KF5Wayland_FOUND)
     set(Wayland_LIBRARIES KF5::WaylandClient)
 endif()
 
+
+# KDecoration2/Plasma Version
+if(${KDecoration2_VERSION} VERSION_GREATER_EQUAL "5.25.0")
+    set(HAVE_KDecoration2_5_25 ON)
+else()
+    set(HAVE_KDecoration2_5_25 OFF)
+endif()
+message(STATUS "HAVE_KDecoration2_5_25: ${HAVE_KDecoration2_5_25} (${KDecoration2_VERSION})")
+
 # KF5 Version
 if(${KF5_VERSION} VERSION_GREATER_EQUAL "5.101.0")
     set(HAVE_KF5_101 ON)
 else()
     set(HAVE_KF5_101 OFF)
 endif()
-message(STATUS "HAVE_KF5_101: ${HAVE_KF5_101}")
+message(STATUS "HAVE_KF5_101: ${HAVE_KF5_101} (${KF5_VERSION})")
 
 
 configure_file(BuildConfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/BuildConfig.h)
