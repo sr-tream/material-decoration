@@ -77,6 +77,7 @@ private slots:
     void onSectionUnderMouseChanged(const Qt::WindowFrameSection value);
 
 private:
+    void updateBlur();
     void updateBorders();
     void updateResizeBorders();
     void updateTitleBar();
