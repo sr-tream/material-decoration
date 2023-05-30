@@ -991,7 +991,8 @@ void Decoration::paintTitleBarBackground(QPainter *painter, const QRect &repaint
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setBrush(titleBarBackgroundColor());
-    painter->drawRect(QRect(0, 0, size().width(), titleBarHeight()));
+    // painter->drawRect(QRect(0, 0, size().width(), titleBarHeight()));
+    painter->drawRoundedRect(rect(), 5, 5);
     painter->restore();
 }
 

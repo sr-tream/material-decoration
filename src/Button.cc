@@ -212,7 +212,7 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
 
     painter->save();
 
-    painter->setRenderHints(QPainter::Antialiasing, false);
+    painter->setRenderHints(QPainter::Antialiasing, true);
 
     // Opacity
     painter->setOpacity(m_opacity);
@@ -220,7 +220,8 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
     // Background.
     painter->setPen(Qt::NoPen);
     painter->setBrush(backgroundColor());
-    painter->drawRect(buttonRect);
+    // painter->drawRect(buttonRect);
+    painter->drawRoundedRect(buttonRect, 5, 5);
 
     // Foreground.
     setPenWidth(painter, gridUnit, 1);
@@ -326,9 +327,6 @@ QColor Button::backgroundColor() const
         // when we just change the fgColor on hover instead of the bgColor.
        //return Qt::transparent;
     //}
-if (type() == KDecoration2::DecorationButtonType::Close || type() == KDecoration2::DecorationButtonType::Maximize || type() == KDecoration2::DecorationButtonType::Minimize) {
-    return Qt::transparent;
-}
     //--- CloseButton
     if (type() == KDecoration2::DecorationButtonType::Close) {
         auto *decoratedClient = deco->client().toStrongRef().data();
@@ -427,12 +425,12 @@ QColor Button::foregroundColor() const
         // Breeze GTK has huge margins around the button. It looks better
         // when we just change the fgColor on hover instead of the bgColor.
         QColor hoveredColor;
-         if (type() == KDecoration2::DecorationButtonType::Close) {
-             auto *decoratedClient = deco->client().toStrongRef().data();
-             hoveredColor = decoratedClient->color(
-                 KDecoration2::ColorGroup::Warning,
-                 KDecoration2::ColorRole::Foreground
-             );
+        //  if (type() == KDecoration2::DecorationButtonType::Close) {
+        //      auto *decoratedClient = deco->client().toStrongRef().data();
+        //      hoveredColor = decoratedClient->color(
+        //          KDecoration2::ColorGroup::Warning,
+        //          KDecoration2::ColorRole::Foreground
+        //      );
         // } else if (type() == KDecoration2::DecorationButtonType::Maximize) {
         //     const int grayValue = qGray(deco->titleBarBackgroundColor().rgb());
         //     if (grayValue < 128) { // Dark Bg
@@ -447,9 +445,9 @@ QColor Button::foregroundColor() const
         //     } else { // Light Bg
         //         hoveredColor = QColor(255, 188, 48); // from SierraBreeze
         //     }
-         } else {
+        //  } else {
             hoveredColor = deco->titleBarForegroundColor();
-        }
+        // }
 
         return KColorUtils::mix(
             normalColor,
