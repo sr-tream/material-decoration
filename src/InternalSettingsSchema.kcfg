@@ -36,6 +36,11 @@
             <default>0.85</default>
         </entry>
 
+        <!-- blur -->
+        <entry name="BlurEnabled" type="Bool">
+            <default>true</default>
+        </entry>
+
         <!-- menu -->
         <entry name="MenuAlwaysShow" type="Bool">
             <default>true</default>

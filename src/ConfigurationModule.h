@@ -39,6 +39,7 @@ private:
     int m_buttonSize;
     double m_activeOpacity;
     double m_inactiveOpacity;
+    bool m_blurEnabled;
     bool m_menuAlwaysShow;
     int m_menuButtonHorzPadding;
     bool m_animationsEnabled;

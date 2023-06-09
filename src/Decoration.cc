@@ -398,6 +398,7 @@ void Decoration::onSectionUnderMouseChanged(const Qt::WindowFrameSection value)
 
 void Decoration::updateBlur()
 {
+    if (!m_internalSettings->blurEnabled()) return;
 #if HAVE_KDecoration2_5_25
     setBlurRegion(QRegion(0, 0, size().width(), size().height()));
 #endif

@@ -114,6 +114,11 @@ void ConfigurationModule::init()
     inactiveOpacity->setObjectName(QStringLiteral("kcfg_InactiveOpacity"));
     generalForm->addRow(i18n("Inactive Opacity:"), inactiveOpacity);
 
+    QCheckBox *blurEnabled = new QCheckBox(generalTab);
+    blurEnabled->setText(i18nd("breeze_kwin_deco", "Enable blur"));
+    blurEnabled->setObjectName(QStringLiteral("kcfg_BlurEnabled"));
+    generalForm->addRow(QStringLiteral(""), blurEnabled);
+
 
     //--- Menu
     QWidget *menuTab = new QWidget(tabWidget);
@@ -220,6 +225,12 @@ void ConfigurationModule::init()
         m_inactiveOpacity,
         0.85,
         QStringLiteral("InactiveOpacity")
+    );
+    skel->addItemBool(
+        QStringLiteral("BlurEnabled"),
+        m_blurEnabled,
+        true,
+        QStringLiteral("BlurEnabled")
     );
     skel->addItemBool(
         QStringLiteral("MenuAlwaysShow"),
